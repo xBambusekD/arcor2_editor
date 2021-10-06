@@ -445,6 +445,16 @@ namespace Base {
         }
     }
 
+    public class ButtonInteractiveObjectEventArgs : EventArgs {
+        public ButtonInteractiveObject InteractiveObject {
+            get; set;
+        }
+
+        public ButtonInteractiveObjectEventArgs(ButtonInteractiveObject interactiveObject) {
+            InteractiveObject = interactiveObject;
+        }
+    }
+
     public class AREditorEventArgs {
         public delegate void StringEventHandler(object sender, StringEventArgs args);
         public delegate void StringListEventHandler(object sender, StringListEventArgs args);
@@ -482,5 +492,6 @@ namespace Base {
         public delegate void CalibrationEventHandler(object sender, CalibrationEventArgs args);
         public delegate void ProjectParameterEventHandler(object sender, ProjectParameterEventArgs args);
         public delegate void GizmoAxisEventHandler(object sender, GizmoAxisEventArgs args);
+        public delegate void ButtonInteractiveObjectEventHandler(object sender, ButtonInteractiveObjectEventArgs args);
     }
 }

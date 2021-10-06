@@ -235,6 +235,14 @@ namespace Base {
             throw new ItemNotFoundException();            
         }
 
+
+        public void SetApCollapsed(bool collapsed) {
+            ActionsCollapsed = collapsed;
+            UpdatePositionsOfPucks();
+            PlayerPrefsHelper.SaveBool($"{ProjectManager.Instance.ProjectMeta.Id}/AP/{GetId()}/collapsed", collapsed);
+        }
+
+
         //TODO: check if it works
         public IO.Swagger.Model.ProjectRobotJoints GetFirstJoints(string robot_id = null, bool valid_only = false) {
             foreach (IO.Swagger.Model.ProjectRobotJoints robotJoint in Data.RobotJoints) {

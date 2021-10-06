@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using static Base.GameManager;
+using UnityEngine.Events;
 
 public class LeftMenuProject : LeftMenu
 {
@@ -21,13 +22,40 @@ public class LeftMenuProject : LeftMenu
     public AddNewActionDialog AddNewActionDialog;
 
     private string selectAPNameWhenCreated = "";
+    public UnityAction<ActionPoint3D> ActionCb;
+
+    public ActionPoint3D APToRemoveOnCancel;
+
+    public string ApToAddActionName = null;
+
+    public GameObject ActionPicker;
     protected override void Update() {
         base.Update();
         if (ProjectManager.Instance.ProjectMeta != null)
             EditorInfo.text = "Project: \n" + ProjectManager.Instance.ProjectMeta.Name;
     }
-    
-    
+
+
+    public enum Mode {
+        Normal,
+        AddAction,
+        Remove,
+        Move,
+        Run,
+        Connections,
+    }
+
+    private Mode currentMode = Mode.Normal;
+
+    public Mode CurrentMode {
+        get => currentMode;
+        private set {
+            currentMode = value;
+            //SelectorMenuButton.interactable = currentMode == Mode.Normal;
+
+        }
+    }
+
 
     private const string SET_ACTION_POINT_PARENT_LABEL = "Set action point parent";
     private const string ADD_ACTION_LABEL = "Add action";
@@ -59,6 +87,11 @@ public class LeftMenuProject : LeftMenu
         GameManager.Instance.OnActionExecution += OnActionExecutionEvent;
         GameManager.Instance.OnActionExecutionCanceled += OnActionExecutionEvent;
         GameManager.Instance.OnActionExecutionFinished += OnActionExecutionEvent;
+
+
+        CurrentMode = Mode.AddAction;
+        RightButtonsMenu.Instance.SetActionMode();
+        SetActiveSubmenu(LeftMenuSelection.None);
     }
 
 
@@ -89,10 +122,160 @@ public class LeftMenuProject : LeftMenu
     }
 
     private void OnActionPointAddedToScene(object sender, ActionPointEventArgs args) {
-        if (!string.IsNullOrEmpty(selectAPNameWhenCreated) && args.ActionPoint.GetName().Contains(selectAPNameWhenCreated)) {
+        /*if (!string.IsNullOrEmpty(selectAPNameWhenCreated) && args.ActionPoint.GetName().Contains(selectAPNameWhenCreated)) {
             SelectorMenu.Instance.SetSelectedObject(args.ActionPoint, true);
             selectAPNameWhenCreated = "";
             RenameClick(true);
+        }*/
+        /*
+        if (ApToAddActionName != null && ActionCb != null && args.ActionPoint.GetName() == ApToAddActionName) {
+            ApToAddActionName = null;
+            ActionCb.Invoke((ActionPoint3D) args.ActionPoint);
+            ActionCb = null;
+        }*/
+    }
+
+    public void StartAddActionMode() {
+
+        if (!ActionModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
+                                                               //close all other opened menus/dialogs and takes care of red background of buttons
+            SetActiveSubmenu(LeftMenuSelection.None, true, true);
+        }
+        if (ActionModeButton.GetComponent<Image>().enabled) {
+            //AddActionModeBtn.GetComponent<Image>().enabled = false;
+            //RestoreSelector();
+            //ActionPicker.SetActive(false);
+
+            //CurrentMode = Mode.Normal;
+            SelectorMenu.Instance.Active = true;
+            SetActiveSubmenu(LeftMenuSelection.None, true, false);
+        } else {
+            ActionModeButton.GetComponent<Image>().enabled = true;
+            RightButtonsMenu.Instance.gameObject.SetActive(true);
+            SelectorMenu.Instance.gameObject.SetActive(false);
+            RightButtonsMenu.Instance.SetActionMode();
+            if (currentMode == Mode.Normal)
+
+                CurrentMode = Mode.AddAction;
+            SelectorMenuButton.GetComponent<Image>().enabled = false;
+        }
+
+    }
+
+    public void StartRemoveMode() {
+
+        if (!RemoveModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
+            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        }
+
+        if (RemoveModeButton.GetComponent<Image>().enabled) {
+            //RemoveModeBtn.GetComponent<Image>().enabled = false;
+            //RestoreSelector();
+
+            //CurrentMode = Mode.Normal;
+            SelectorMenu.Instance.Active = true;
+            SetActiveSubmenu(LeftMenuSelection.None, true, false);
+        } else {
+            RemoveModeButton.GetComponent<Image>().enabled = true;
+            RightButtonsMenu.Instance.gameObject.SetActive(true);
+            SelectorMenu.Instance.gameObject.SetActive(false);
+            RightButtonsMenu.Instance.SetRemoveMode();
+            CurrentMode = Mode.Remove;
+            SelectorMenuButton.GetComponent<Image>().enabled = false;
+        }
+
+    }
+
+    public void StartMoveMode() {
+        if (!MoveModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
+            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        }
+        if (MoveModeButton.GetComponent<Image>().enabled) {
+            //MoveModeButton.GetComponent<Image>().enabled = false;
+            //RestoreSelector();
+
+            //CurrentMode = Mode.Normal;
+            SelectorMenu.Instance.Active = true;
+            SetActiveSubmenu(LeftMenuSelection.None, true, false);
+        } else {
+            MoveModeButton.GetComponent<Image>().enabled = true;
+            RightButtonsMenu.Instance.gameObject.SetActive(true);
+            SelectorMenu.Instance.gameObject.SetActive(false);
+            RightButtonsMenu.Instance.SetMoveMode();
+            CurrentMode = Mode.Move;
+            SelectorMenuButton.GetComponent<Image>().enabled = false;
+        }
+
+    }
+
+    public void StartRunMode() {
+        if (!RunModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
+            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        }
+        if (RunModeButton.GetComponent<Image>().enabled) {
+            //RunModeButton.GetComponent<Image>().enabled = false;
+            //RestoreSelector();
+
+            //CurrentMode = Mode.Normal;
+            SelectorMenu.Instance.Active = true;
+            SetActiveSubmenu(LeftMenuSelection.None, true, false);
+        } else {
+            RunModeButton.GetComponent<Image>().enabled = true;
+            RightButtonsMenu.Instance.gameObject.SetActive(true);
+            SelectorMenu.Instance.gameObject.SetActive(false);
+            RightButtonsMenu.Instance.SetRunMode();
+            CurrentMode = Mode.Run;
+            SelectorMenuButton.GetComponent<Image>().enabled = false;
+        }
+
+    }
+
+    public void StartConnectionsMode() {
+        if (!ConnectionModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
+            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        }
+        if (ConnectionModeButton.GetComponent<Image>().enabled) {
+            ConnectionModeButton.GetComponent<Image>().enabled = false;
+            //RestoreSelector();
+
+            SelectorMenu.Instance.Active = true;
+            SetActiveSubmenu(LeftMenuSelection.None, true, false);
+        } else {
+            ConnectionModeButton.GetComponent<Image>().enabled = true;
+            RightButtonsMenu.Instance.gameObject.SetActive(true);
+            SelectorMenu.Instance.gameObject.SetActive(false);
+            RightButtonsMenu.Instance.SetConnectionsMode();
+            CurrentMode = Mode.Connections;
+            SelectorMenuButton.GetComponent<Image>().enabled = false;
+        }
+
+    }
+
+    public void SelectorMenuClick() {
+        if (!SelectorMenuButton.GetComponent<Image>().enabled) { //other menu/dialog opened
+            SetActiveSubmenu(CurrentSubmenuOpened, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        }
+
+
+        if (SelectorMenuButton.GetComponent<Image>().enabled) {
+            SelectorMenu.Instance.Active = true;
+            SetActiveSubmenu(LeftMenuSelection.Utility, true, false);
+            SelectorMenu.Instance.gameObject.SetActive(true);
+            /*
+            if (TransformMenu.Instance.CanvasGroup.alpha > 0) {
+                TransformMenu.Instance.Hide();
+            } else {
+                SelectorMenuButton.GetComponent<Image>().enabled = false;
+                RightButtonsMenu.Instance.gameObject.SetActive(true);
+                SelectorMenu.Instance.gameObject.SetActive(false);
+                SetActiveSubmenu(LeftMenuSelection.None);
+                SelectorMenu.Instance.DeselectObject();
+            }*/
+        } else {
+            SelectorMenuButton.GetComponent<Image>().enabled = true;
+            RightButtonsMenu.Instance.gameObject.SetActive(false);
+            SelectorMenu.Instance.gameObject.SetActive(true);
+            SetActiveSubmenu(LeftMenuSelection.Utility);
         }
     }
 
@@ -567,5 +750,152 @@ public class LeftMenuProject : LeftMenu
             return;
         }
         
+    }
+
+    public async void CloseActionPicker(bool setActionMode = true) {
+        if (CurrentMode == Mode.AddAction) {
+            if (APToRemoveOnCancel != null) {
+                await WebsocketManager.Instance.RemoveActionPoint(APToRemoveOnCancel.GetId());
+            }
+            if (ProjectManager.Instance.PrevAction != null &&
+                ProjectManager.Instance.NextAction != null) {
+                try {
+                    await WebsocketManager.Instance.AddLogicItem(ProjectManager.Instance.PrevAction,
+                        ProjectManager.Instance.NextAction, null, false);
+                } catch (RequestFailedException) {
+                } finally {
+                    ProjectManager.Instance.PrevAction = null;
+                    ProjectManager.Instance.NextAction = null;
+                }
+            }
+            APToRemoveOnCancel = null;
+            ActionPicker.SetActive(false);
+            SelectorMenu.Instance.Active = true;
+            if (setActionMode)
+                RightButtonsMenu.Instance.SetActionMode();
+        } else {
+            APToRemoveOnCancel = null;
+            //RestoreSelector();
+            ActionPicker.SetActive(false);
+        }
+    }
+
+    public async void ActionMoveToClick() {
+        InteractiveObject selectedObject = SelectorMenu.Instance.GetSelectedObject();
+        if (selectedObject is ActionPoint3D actionPoint) {
+            ActionMoveToClick(actionPoint);
+        } else if (selectedObject is Action3D action) {
+            ActionMoveToClick((ActionPoint3D) action.ActionPoint);
+        }
+    }
+
+    public void ActionMoveToClick(ActionPoint3D actionPoint) {
+        string robotId = "";
+        foreach (IRobot r in SceneManager.Instance.GetRobots()) {
+            robotId = r.GetId();
+        }
+        string name = ProjectManager.Instance.GetFreeActionName("MoveTo");
+        NamedOrientation o = actionPoint.GetFirstOrientation();
+        List<ActionParameter> parameters = new List<ActionParameter> {
+            new ActionParameter(name: "pose", type: "pose", value: "\"" + o.Id + "\""),
+            new ActionParameter(name: "move_type", type: "string_enum", value: "\"JOINTS\""),
+            new ActionParameter(name: "velocity", type: "double", value: "30.0"),
+            new ActionParameter(name: "acceleration", type: "double", value: "50.0")
+        };
+        IActionProvider robot = SceneManager.Instance.GetActionObject(robotId);
+        //ProjectManager.Instance.ActionToSelect = name;
+        WebsocketManager.Instance.AddAction(actionPoint.GetId(), parameters, robotId + "/move", name, robot.GetActionMetadata("move").GetFlows(name));
+        //RestoreSelector();
+        ActionPicker.SetActive(false);
+        //if (CurrentMode == Mode.AddAction) {
+        SelectorMenu.Instance.Active = true;
+        RightButtonsMenu.Instance.SetActionMode();
+        if (APToRemoveOnCancel != null)
+            RightButtonsMenu.Instance.MoveClick();
+        //} else {
+        // RestoreSelector();
+        //    AddActionButton.GetComponent<Image>().enabled = false;
+        //}
+        APToRemoveOnCancel = null;
+    }
+    public async void ActionPickClick() {
+        InteractiveObject selectedObject = SelectorMenu.Instance.GetSelectedObject();
+        if (selectedObject is ActionPoint3D actionPoint) {
+            ActionPickClick(actionPoint);
+        } else if (selectedObject is Action3D action) {
+            ActionPickClick((ActionPoint3D) action.ActionPoint);
+        }
+    }
+
+
+    public void ActionPickClick(ActionPoint3D actionPoint) {
+
+        string robotId = "";
+        foreach (IRobot r in SceneManager.Instance.GetRobots()) {
+            robotId = r.GetId();
+        }
+        string name = ProjectManager.Instance.GetFreeActionName("Pick");
+        NamedOrientation o = ((ActionPoint3D) actionPoint).GetFirstOrientation();
+        List<ActionParameter> parameters = new List<ActionParameter> {
+            new ActionParameter(name: "pick_pose", type: "pose", value: "\"" + o.Id + "\""),
+            new ActionParameter(name: "vertical_offset", type: "double", value: "0.0")
+        };
+        IActionProvider robot = SceneManager.Instance.GetActionObject(robotId);
+
+        //ProjectManager.Instance.ActionToSelect = name;
+        WebsocketManager.Instance.AddAction(actionPoint.GetId(), parameters, robotId + "/pick", name, robot.GetActionMetadata("pick").GetFlows(name));
+        //RestoreSelector();
+        ActionPicker.SetActive(false);
+        //if (CurrentMode == Mode.AddAction) {
+        SelectorMenu.Instance.Active = true;
+        RightButtonsMenu.Instance.SetActionMode();
+        if (APToRemoveOnCancel != null)
+            RightButtonsMenu.Instance.MoveClick();
+        /*} else {
+            //RestoreSelector();
+            AddActionButton.GetComponent<Image>().enabled = false;
+        }*/
+        APToRemoveOnCancel = null;
+
+
+    }
+
+    public async void ActionReleaseClick() {
+        InteractiveObject selectedObject = SelectorMenu.Instance.GetSelectedObject();
+        if (selectedObject is ActionPoint3D actionPoint) {
+            ActionReleaseClick(actionPoint);
+        } else if (selectedObject is Action3D action) {
+            ActionReleaseClick((ActionPoint3D) action.ActionPoint);
+        }
+    }
+
+    public void ActionReleaseClick(ActionPoint3D actionPoint) {
+        string robotId = "";
+        foreach (IRobot r in SceneManager.Instance.GetRobots()) {
+            robotId = r.GetId();
+        }
+        string name = ProjectManager.Instance.GetFreeActionName("Release");
+        NamedOrientation o = ((ActionPoint3D) actionPoint).GetFirstOrientation();
+        List<ActionParameter> parameters = new List<ActionParameter> {
+            new ActionParameter(name: "place_pose", type: "pose", value: "\"" + o.Id + "\""),
+            new ActionParameter(name: "vertical_offset", type: "double", value: "0.0")
+        };
+        IActionProvider robot = SceneManager.Instance.GetActionObject(robotId);
+
+        //ProjectManager.Instance.ActionToSelect = name;
+        WebsocketManager.Instance.AddAction(actionPoint.GetId(), parameters, robotId + "/place", name, robot.GetActionMetadata("place").GetFlows(name));
+        //RestoreSelector();
+        ActionPicker.SetActive(false);
+        //if (CurrentMode == Mode.AddAction) {
+        SelectorMenu.Instance.Active = true;
+        RightButtonsMenu.Instance.SetActionMode();
+        if (APToRemoveOnCancel != null)
+            RightButtonsMenu.Instance.MoveClick();
+        /*} else {
+            //RestoreSelector();
+            AddActionButton.GetComponent<Image>().enabled = false;
+        }*/
+        APToRemoveOnCancel = null;
+
     }
 }

@@ -92,6 +92,9 @@ namespace Base {
         }
 
 
+        public RobotEE MoveApToRobot = null;
+        public string PrevAction = null, NextAction = null;
+
         /// <summary>
         /// Invoked when some of the action point weas updated. Contains action point description
         /// </summary>
@@ -117,6 +120,18 @@ namespace Base {
         /// Indicates whether there is any object with available action in the scene
         /// </summary>
         public bool AnyAvailableAction;
+
+
+        public List<string> LastAddedAPs;
+
+        public string SelectAPNameWhenCreated {
+            get;
+            internal set;
+        }
+        public string ActionToSelect {
+            get;
+            set;
+        }
 
         public event AREditorEventArgs.ActionPointEventHandler OnActionPointAddedToScene;
         public event AREditorEventArgs.ActionEventHandler OnActionAddedToScene;
@@ -304,7 +319,7 @@ namespace Base {
         }
         
 
-        private void OnActionPointAdded(object sender, ProjectActionPointEventArgs data) {
+        private async void OnActionPointAdded(object sender, ProjectActionPointEventArgs data) {
             ActionPoint ap = null;
             if (data.ActionPoint.Parent == null || data.ActionPoint.Parent == "") {
                 ap = SpawnActionPoint(data.ActionPoint, null);
@@ -317,7 +332,31 @@ namespace Base {
                 }
 
             }
-            
+            if (ap != null) {
+                SelectorMenu.Instance.UpdateFilters();
+                SelectorMenu.Instance.SetSelectedObject(ap, true);
+                //// FOR EXPERIMENT!!
+                ///
+                /*await WebsocketManager.Instance.AddActionPointOrientationUsingRobot(ap.GetId(), robot.GetId(),
+                  "default", "default");*/
+                try {
+                    await ap.WriteLock(true);
+                    await WebsocketManager.Instance.AddActionPointOrientation(ap.GetId(), DataHelper.QuaternionToOrientation(Quaternion.Euler(180, 0, 0)), "default");
+                    
+                    if (MoveApToRobot != null) {
+                        await WebsocketManager.Instance.UpdateActionPointUsingRobot(ap.GetId(), MoveApToRobot.Robot.GetId(), MoveApToRobot.EEId);
+                    }
+                    await ap.WriteUnlock();
+
+                } catch (RequestFailedException) {
+                }
+                if (!string.IsNullOrEmpty(SelectAPNameWhenCreated) && data.ActionPoint.Name.Contains(SelectAPNameWhenCreated))
+                    RightButtonsMenu.Instance.MoveClick();
+                SelectAPNameWhenCreated = "";
+                AREditorResources.Instance.LeftMenuProject.ActionCb.Invoke((ActionPoint3D) ap);
+                AREditorResources.Instance.LeftMenuProject.ActionCb = null;
+                //await WebsocketManager.Instance.AddActionPointOrientationUsingRobot(ap.GetId(), DataHelper.QuaternionToOrientation(Quaternion.Euler(180, 0, 0)), "def");
+            }
             updateProject = true;
         }
 
@@ -338,7 +377,9 @@ namespace Base {
             Debug.Assert(ActionsManager.Instance.ActionsReady);
             if (ProjectMeta != null)
                 return false;
-
+            LastAddedAPs = new List<string> {
+                "START"
+            };
             SetProjectMeta(DataHelper.ProjectToBareProject(project));
             AllowEdit = allowEdit;
             LoadSettings();
@@ -1035,6 +1076,7 @@ namespace Base {
             ap.UpdatePositionsOfPucks();
             puck.SetActive(true);
 
+            LastAddedAPs.Add(action.GetId());
             return action;
         }
 
@@ -1065,6 +1107,7 @@ namespace Base {
             // Call function in corresponding action that will delete it and properly remove all references and connections.
             // We don't want to update project, because we are calling this method only upon received update from server.
             ActionPoints[apIdToRemove].Actions[Id].DeleteAction();
+            LastAddedAPs.Remove(Id);
         }
 
         public bool ActionsContainsName(string name) {
@@ -1178,7 +1221,7 @@ namespace Base {
         /// </summary>
         /// <param name="projectAction">Action description</param>
         /// <param name="parentId">UUID of action point to which the action should be added</param>
-        public void ActionAdded(IO.Swagger.Model.Action projectAction, string parentId) {
+        public async void ActionAdded(IO.Swagger.Model.Action projectAction, string parentId) {
             ActionPoint actionPoint = GetActionPoint(parentId);
             try {
                 Base.Action action = SpawnAction(projectAction, actionPoint);
@@ -1189,6 +1232,27 @@ namespace Base {
                 //action.EnableInputOutput(MainSettingsMenu.Instance.ConnectionsSwitch.IsOn());
                 updateProject = true;
                 OnActionAddedToScene.Invoke(this, new ActionEventArgs(action));
+                if (ActionToSelect == action.GetName()) {
+                    SelectorMenu.Instance.SetSelectedObject(action, true);
+                    ActionToSelect = "";
+                }
+                if (!string.IsNullOrEmpty(PrevAction) && !string.IsNullOrEmpty(NextAction)) {
+                    await WebsocketManager.Instance.AddLogicItem(PrevAction, action.GetId(), null, false);
+                    await WebsocketManager.Instance.AddLogicItem(action.GetId(), NextAction, null, false);
+                    PrevAction = NextAction = null;
+                } else if (LastAddedAPs.Count >= 2) {
+                    for (int i = LastAddedAPs.Count() - 2; i >= 0; --i) {
+                        Action a;
+                        if (LastAddedAPs[i] != "START")
+                            a = GetAction(LastAddedAPs[i]);
+                        else
+                            a = StartAction;
+                        if (!a.Output.AnyConnection()) {
+                            await WebsocketManager.Instance.AddLogicItem(LastAddedAPs[i], action.GetId(), null, false);
+                            break;
+                        }
+                    }
+                }
             } catch (RequestFailedException ex) {
                 Debug.LogError(ex);
             }            

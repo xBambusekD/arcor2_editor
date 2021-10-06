@@ -14,7 +14,7 @@ public abstract class LeftMenu : MonoBehaviour {
 
     public CanvasGroup CanvasGroup;
 
-    public Button FavoritesButton, RobotButton, AddButton, UtilityButton, HomeButton;
+    public Button RunModeButton, ActionModeButton, RemoveModeButton, MoveModeButton, ConnectionModeButton, SelectorMenuButton;
     public ButtonWithTooltip MoveButton, MoveButton2, RemoveButton, RenameButton, CalibrationButton,
         OpenMenuButton, RobotSelectorButton, RobotSteppingButton, CloseButton, SaveButton, MainSettingsButton, CopyButton; //Buttons with number 2 are duplicates in favorites submenu
     public GameObject FavoritesButtons, HomeButtons, UtilityButtons, AddButtons, RobotButtons;
@@ -332,7 +332,7 @@ public abstract class LeftMenu : MonoBehaviour {
         OpenRobotSelector();
     }
 
-    protected async void OpenRobotSelector(UnityAction afterSelectionCallback = null) {
+    public async void OpenRobotSelector(UnityAction afterSelectionCallback = null) {
         if (!SceneManager.Instance.SceneStarted) {
             Notifications.Instance.ShowNotification("Failed to open robot selector", "Scene offline");
             return;
@@ -551,8 +551,9 @@ public abstract class LeftMenu : MonoBehaviour {
             return;
         switch (which) {
             case LeftMenuSelection.None:
+                RightButtonsMenu.Instance.gameObject.SetActive(true);
                 break;
-            case LeftMenuSelection.Favorites:
+            /*case LeftMenuSelection.Favorites:
                 FavoritesButtons.SetActive(active);
                 FavoritesButton.GetComponent<Image>().enabled = active;
                 break;
@@ -572,7 +573,7 @@ public abstract class LeftMenu : MonoBehaviour {
             case LeftMenuSelection.Robot:
                 RobotButtons.SetActive(active);
                 RobotButton.GetComponent<Image>().enabled = active;
-                break;
+                break;*/
             
         }
     }
@@ -599,11 +600,21 @@ public abstract class LeftMenu : MonoBehaviour {
         AddButtons.SetActive(false);
         RobotButtons.SetActive(false);
 
-        FavoritesButton.GetComponent<Image>().enabled = false;
+
+        RunModeButton.GetComponent<Image>().enabled = false;
+        ActionModeButton.GetComponent<Image>().enabled = false;
+        RemoveModeButton.GetComponent<Image>().enabled = false;
+        MoveModeButton.GetComponent<Image>().enabled = false;
+        ConnectionModeButton.GetComponent<Image>().enabled = false;
+
+        //ActionModeButton.GetComponent<Image>.enabled = false;
+        
+
+        /*FavoritesButton.GetComponent<Image>().enabled = false;
         RobotButton.GetComponent<Image>().enabled = false;
         AddButton.GetComponent<Image>().enabled = false;
         UtilityButton.GetComponent<Image>().enabled = false;
-        HomeButton.GetComponent<Image>().enabled = false;
+        HomeButton.GetComponent<Image>().enabled = false;*/
 
         MainSettingsButton.GetComponent<Image>().enabled = false;
         MoveButton.GetComponent<Image>().enabled = false;

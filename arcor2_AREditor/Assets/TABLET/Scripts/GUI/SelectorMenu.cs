@@ -26,6 +26,7 @@ public class SelectorMenu : Singleton<SelectorMenu> {
     public ToggleGroupIconButtons BottomButtons;
 
     public Dictionary<string, SelectorItem> SelectorItems = new Dictionary<string, SelectorItem>();
+    public bool Active;
 
 
     public bool ManuallySelected {
@@ -55,6 +56,7 @@ public class SelectorMenu : Singleton<SelectorMenu> {
         ProjectManager.Instance.OnLoadProject += OnLoadProjectScene;
         SceneManager.Instance.OnLoadScene += OnLoadProjectScene;
         GameManager.Instance.OnRunPackage += OnLoadProjectScene;
+        Active = true;
     }
 
     private void OnLoadProjectScene(object sender, EventArgs e) {
@@ -74,10 +76,15 @@ public class SelectorMenu : Singleton<SelectorMenu> {
         editorState = args.Data;
         switch (editorState) {
             case EditorStateEnum.Normal:
+                DeselectObject(true);
+                requestingObject = false;
+                Active = true;
+                break;
             case EditorStateEnum.Closed:
             case EditorStateEnum.InteractionDisabled:
                 DeselectObject(true);
                 requestingObject = false;
+                Active = false;
                 break;
             case EditorStateEnum.SelectingAction:
             case EditorStateEnum.SelectingActionInput:
@@ -89,6 +96,7 @@ public class SelectorMenu : Singleton<SelectorMenu> {
             case EditorStateEnum.SelectingActionPointParent:
                 DeselectObject(true);
                 requestingObject = true;
+                Active = true;
                 break;
         }
     }
@@ -139,7 +147,7 @@ public class SelectorMenu : Singleton<SelectorMenu> {
 
     private void SelectedObjectChanged(SelectorItem selectorItem, bool force = false) {
         if (force || selectorItem != lastSelectedItem) {
-            OnObjectSelectedChangedEvent.Invoke(this, new InteractiveObjectEventArgs(selectorItem == null ? null : selectorItem.InteractiveObject));
+            OnObjectSelectedChangedEvent.Invoke(this, new InteractiveObjectEventArgs(selectorItem?.InteractiveObject));
             lastSelectedItem = selectorItem;
         }
     }

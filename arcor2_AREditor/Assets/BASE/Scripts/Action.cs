@@ -30,7 +30,9 @@ namespace Base {
 
 
         public bool ActionBeingExecuted = false;
-        
+
+        public bool ActionsCollapsed;
+
         public virtual void Init(IO.Swagger.Model.Action projectAction, ActionMetadata metadata, ActionPoint ap, IActionProvider actionProvider) {
 
             ActionPoint = ap;
@@ -72,6 +74,7 @@ namespace Base {
             }
             
         }
+
 
         public void UpdateType() {
             Data.Type = GetActionType();
@@ -254,7 +257,7 @@ namespace Base {
             
         }
 
-        private IO.Swagger.Model.ProjectLogicIf GetProjectLogicIf() {
+        public IO.Swagger.Model.ProjectLogicIf GetProjectLogicIf() {
             if (Output.ifValue is null)
                 return null;
             List<Flow> flows = GetFlows();
