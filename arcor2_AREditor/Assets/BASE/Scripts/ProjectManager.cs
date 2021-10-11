@@ -465,6 +465,8 @@ namespace Base {
                 if (!LogicItems.TryGetValue(projectLogicItem.Id, out LogicItem logicItem)) {
                     logicItem = new LogicItem(projectLogicItem);
                     LogicItems.Add(logicItem.Data.Id, logicItem);
+                    (logicItem.Input.Action).UpdateConnections();
+                    (logicItem.Output.Action).UpdateConnections();
                 } else {
                     logicItem.UpdateConnection(projectLogicItem);
                 }
@@ -507,6 +509,8 @@ namespace Base {
         private void OnLogicItemAdded(object sender, LogicItemChangedEventArgs args) {
             LogicItem logicItem = new LogicItem(args.Data);
             LogicItems.Add(args.Data.Id, logicItem);
+            ((Action3D) logicItem.Input.Action).UpdateConnections();
+            ((Action3D) logicItem.Output.Action).UpdateConnections();
         }
 
         /// <summary>

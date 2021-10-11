@@ -18,13 +18,22 @@ public class Action3D : Base.Action, ISubItem {
     private Color32 colorRunnning = new Color32(255, 0, 255, 255);
 
     private bool selected = false;
+    int counter = 0;
     [SerializeField]
     protected OutlineOnClick outlineOnClick;
+    private System.Random rand = new System.Random();
 
     public override void Init(IO.Swagger.Model.Action projectAction, Base.ActionMetadata metadata, Base.ActionPoint ap, IActionProvider actionProvider) {
         base.Init(projectAction, metadata, ap, actionProvider);
        // Input.SelectorItem = SelectorMenu.Instance.CreateSelectorItem(Input);
         //Output.SelectorItem = SelectorMenu.Instance.CreateSelectorItem(Output);
+    }
+
+    private void FixedUpdate() {
+        if (counter++ > rand.Next(20, 150)) {
+            UpdateConnections();
+            counter = 0;
+        }
     }
 
     protected override void Start() {
@@ -172,24 +181,23 @@ public class Action3D : Base.Action, ISubItem {
     }
 
     public async override Task<RequestResult> Removable() {
-        if (GameManager.Instance.GetGameState() != GameManager.GameStateEnum.ProjectEditor)
-            return new RequestResult(false, "Action could only be removed in project editor");
-        else {
-            try {
-                await WebsocketManager.Instance.RemoveAction(GetId(), true);
-                return new RequestResult(true);
-            } catch (RequestFailedException ex) {
-                return new RequestResult(false, ex.Message);
-            }
-        }
+        return new RequestResult(true);
     }
 
     public async override void Remove() {
         try {
-            await WebsocketManager.Instance.RemoveAction(GetId(), false);
+            await RemoveAsync();
         } catch (RequestFailedException ex) {
             Notifications.Instance.ShowNotification("Failed to remove action " + GetName(), ex.Message);
         }
+    }
+
+    public async Task RemoveAsync() {
+        if (Input.AnyConnection())
+            await WebsocketManager.Instance.RemoveLogicItem(Input.GetLogicItems()[0].Data.Id);
+        if (Output.AnyConnection())
+            await WebsocketManager.Instance.RemoveLogicItem(Output.GetLogicItems()[0].Data.Id);
+        await WebsocketManager.Instance.RemoveAction(GetId(), false);
     }
 
     public async override Task Rename(string newName) {
@@ -226,4 +234,6 @@ public class Action3D : Base.Action, ISubItem {
     public override void EnableVisual(bool enable) {
         throw new NotImplementedException();
     }
+
+    
 }

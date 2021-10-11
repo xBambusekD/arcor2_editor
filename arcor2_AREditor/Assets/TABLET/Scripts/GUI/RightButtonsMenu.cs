@@ -289,11 +289,11 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
                              selectedObject.Remove();
                              SetRemoveMode();
                              SelectorMenu.Instance.Active = true;
+                             AREditorResources.Instance.LeftMenuProject.ConfirmationDialog.Close();
                          },
                          () => {
                              SetRemoveMode();
                              SelectorMenu.Instance.Active = true;
-                             Debug.LogError("fasdhfjkkjyxchv");
                          });
     }
 

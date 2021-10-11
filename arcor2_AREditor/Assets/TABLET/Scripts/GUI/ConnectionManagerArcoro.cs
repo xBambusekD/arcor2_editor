@@ -8,8 +8,8 @@ using UnityEngine;
 public class ConnectionManagerArcoro : Base.Singleton<ConnectionManagerArcoro> {
 
     public GameObject ConnectionPrefab;
-    public List<Connection> Connections = new List<Connection>();
-    private Connection virtualConnectionToMouse;
+    public List<ConnectionLine> Connections = new List<ConnectionLine>();
+    private ConnectionLine virtualConnectionToMouse;
     private GameObject virtualPointer;
     [SerializeField]
     private Material EnabledMaterial, DisabledMaterial;
@@ -18,23 +18,28 @@ public class ConnectionManagerArcoro : Base.Singleton<ConnectionManagerArcoro> {
         virtualPointer = VirtualConnectionOnTouch.Instance.VirtualPointer;
     }
 
-    public Connection CreateConnection(GameObject o1, GameObject o2) {
-        Connection c = Instantiate(ConnectionPrefab).GetComponent<Connection>();
+    public ConnectionLine CreateConnection(GameObject o1, GameObject o2) {
+        ConnectionLine c = Instantiate(ConnectionPrefab).GetComponent<ConnectionLine>();
         c.transform.SetParent(transform);
         // Set correct targets. Output has to be always at 0 index, because we are connecting output to input.
         // Output has direction to the east, while input has direction to the west.
         if (o1.GetComponent<Base.InputOutput>().GetType() == typeof(Base.PuckOutput)) {
-            c.target[0] = o1.GetComponent<RectTransform>();
-            c.target[1] = o2.GetComponent<RectTransform>();
+            c.Target[0] = o1.GetComponent<RectTransform>();
+            c.Target[1] = o2.GetComponent<RectTransform>();
         } else {
-            c.target[1] = o1.GetComponent<RectTransform>();
-            c.target[0] = o2.GetComponent<RectTransform>();
+            c.Target[1] = o1.GetComponent<RectTransform>();
+            c.Target[0] = o2.GetComponent<RectTransform>();
         }
         Connections.Add(c);
         if (! (bool) MainSettingsMenu.Instance.ConnectionsSwitch.GetValue())
             c.gameObject.SetActive(false);
         
         return c;
+    }
+
+    private void FixedUpdate() {
+        if (virtualConnectionToMouse != null)
+            virtualConnectionToMouse.UpdateConnection();
     }
 
     public void CreateConnectionToPointer(GameObject o) {
@@ -52,7 +57,7 @@ public class ConnectionManagerArcoro : Base.Singleton<ConnectionManagerArcoro> {
         VirtualConnectionOnTouch.Instance.DrawVirtualConnection = false;
     }
 
-    public void DestroyConnection(Connection connection) {
+    public void DestroyConnection(ConnectionLine connection) {
         Connections.Remove(connection);
         Destroy(connection.gameObject);
     }
@@ -72,43 +77,43 @@ public class ConnectionManagerArcoro : Base.Singleton<ConnectionManagerArcoro> {
         return GetConnectedTo(virtualConnectionToMouse, virtualPointer);
     }
 
-     public Base.Action GetActionConnectedTo(Connection c, GameObject o) {        
+     public Base.Action GetActionConnectedTo(ConnectionLine c, GameObject o) {        
         return GetConnectedTo(c, o).GetComponent<InputOutput>().Action;
     }
 
-    private int GetIndexOf(Connection c, GameObject o) {
-        if (c.target[0] != null && c.target[0].gameObject == o) {
+    private int GetIndexOf(ConnectionLine c, GameObject o) {
+        if (c.Target[0] != null && c.Target[0].gameObject == o) {
             return 0;
-        } else if (c.target[1] != null && c.target[1].gameObject == o) {
+        } else if (c.Target[1] != null && c.Target[1].gameObject == o) {
             return 1;
         } else {
             return -1;
         }
     }
 
-    private int GetIndexByType(Connection c, System.Type type) {
-        if (c.target[0] != null && c.target[0].gameObject.GetComponent<Base.InputOutput>() != null && c.target[0].gameObject.GetComponent<Base.InputOutput>().GetType().IsSubclassOf(type))
+    private int GetIndexByType(ConnectionLine c, System.Type type) {
+        if (c.Target[0] != null && c.Target[0].gameObject.GetComponent<Base.InputOutput>() != null && c.Target[0].gameObject.GetComponent<Base.InputOutput>().GetType().IsSubclassOf(type))
             return 0;
-        else if (c.target[1] != null && c.target[1].gameObject.GetComponent<Base.InputOutput>() != null && c.target[1].gameObject.GetComponent<Base.InputOutput>().GetType().IsSubclassOf(type))
+        else if (c.Target[1] != null && c.Target[1].gameObject.GetComponent<Base.InputOutput>() != null && c.Target[1].gameObject.GetComponent<Base.InputOutput>().GetType().IsSubclassOf(type))
             return 1;
         else
             return -1;
 
     }
 
-    public GameObject GetConnectedTo(Connection c, GameObject o) {
+    public GameObject GetConnectedTo(ConnectionLine c, GameObject o) {
         if (c == null || o == null)
             return null;
         int i = GetIndexOf(c, o);
         if (i < 0)
             return null;
-        return c.target[1 - i].gameObject;
+        return c.Target[1 - i].gameObject;
     }
 
     /**
      * Checks that there is input on one end of connection and output on the other side
      */
-    public bool ValidateConnection(Connection c) {
+    public bool ValidateConnection(ConnectionLine c) {
         if (c == null)
             return false;
         int input = GetIndexByType(c, typeof(Base.InputOutput)), output = GetIndexByType(c, typeof(Base.PuckOutput));
@@ -134,7 +139,7 @@ public class ConnectionManagerArcoro : Base.Singleton<ConnectionManagerArcoro> {
     }
 
     public void Clear() {
-        foreach (Connection c in Connections) {
+        foreach (ConnectionLine c in Connections) {
             if (c != null && c.gameObject != null) {
                 Destroy(c.gameObject);
             }
@@ -143,7 +148,7 @@ public class ConnectionManagerArcoro : Base.Singleton<ConnectionManagerArcoro> {
     }
 
     public void DisplayConnections(bool active) {
-        foreach (Connection connection in Connections) {
+        foreach (ConnectionLine connection in Connections) {
             connection.gameObject.SetActive(active);
         }
     }

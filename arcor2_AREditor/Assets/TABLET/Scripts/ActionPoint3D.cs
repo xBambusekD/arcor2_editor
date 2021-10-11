@@ -6,6 +6,7 @@ using IO.Swagger.Model;
 using TMPro;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 [RequireComponent(typeof(OutlineOnClick))]
 [RequireComponent(typeof(Target))]
@@ -77,6 +78,8 @@ public class ActionPoint3D : Base.ActionPoint {
             foreach (Action3D action in Actions.Values) {
                 action.transform.localPosition = new Vector3(0, 0, 0);
                 action.transform.localScale = new Vector3(0, 0, 0);
+                action.Enable(false);
+                action.UpdateConnections();
             }
             
         } else {
@@ -85,6 +88,8 @@ public class ActionPoint3D : Base.ActionPoint {
                 action.transform.localPosition = new Vector3(0, i * 0.015f, 0);
                 ++i;
                 action.transform.localScale = new Vector3(1, 1, 1);
+                action.Enable(true);
+                action.UpdateConnections();
             }
         }        
     }
@@ -199,20 +204,16 @@ public class ActionPoint3D : Base.ActionPoint {
     }
 
     public async override Task<RequestResult> Removable() {
-        if (GameManager.Instance.GetGameState() != GameManager.GameStateEnum.ProjectEditor) {
-            return new RequestResult(false, "AP could only be removed in project editor");
-        } else {
-            try {
-                await WebsocketManager.Instance.RemoveActionPoint(GetId(), true);
-                return new RequestResult(true);
-            } catch (RequestFailedException ex) {
-                return new RequestResult(false, ex.Message);
-            }
-        }
+        return new RequestResult(true);
     }
 
     public async override void Remove() {
         try {
+            List<Base.Action> actions = Actions.Values.ToList();
+            for (int i = Actions.Count - 1; i >= 0; --i) {
+                if (actions[i] is Action3D action3D)
+                    await action3D.RemoveAsync();
+            }
             await WebsocketManager.Instance.RemoveActionPoint(GetId(), false);
         } catch (RequestFailedException ex) {
             Notifications.Instance.ShowNotification("Failed to remove AP " + GetName(), ex.Message);

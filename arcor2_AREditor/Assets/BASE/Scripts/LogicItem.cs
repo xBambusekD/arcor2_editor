@@ -6,7 +6,7 @@ public class LogicItem
 {
     public IO.Swagger.Model.LogicItem Data;
 
-    private Connection connection;
+    private ConnectionLine connection;
 
     private InputOutput input;
     private PuckOutput output;
@@ -41,10 +41,19 @@ public class LogicItem
         input.AddLogicItem(Data.Id);
         output.AddLogicItem(Data.Id);        
         connection = ConnectionManagerArcoro.Instance.CreateConnection(input.gameObject, output.gameObject);
-        output.Action.UpdateRotation(input.Action);
+        output.Action.UpdateRotation(input.transform);
+        connection.InitConnection(Data.Id, Output.Action.GetName() + " => " + Input.Action.GetName());
+        if (Input.LineToConnection != null)
+            GameObject.Destroy(Input.LineToConnection.gameObject);
+        if (Output.LineToConnection != null)
+            GameObject.Destroy(Output.LineToConnection.gameObject);
+        Input.LineToConnection = GameObject.Instantiate(ConnectionManagerArcoro.Instance.ConnectionPrefab).GetComponent<ConnectionLine>();
+        Input.LineToConnection.SetTargets(Input.transform.GetComponent<RectTransform>(), Input.Action.Rear);
+        Output.LineToConnection = GameObject.Instantiate(ConnectionManagerArcoro.Instance.ConnectionPrefab).GetComponent<ConnectionLine>();
+        Output.LineToConnection.SetTargets(Output.Action.Front, Output.transform.GetComponent<RectTransform>());
     }
 
-    public Connection GetConnection() {
+    public ConnectionLine GetConnection() {
         return connection;
     }
 

@@ -2930,7 +2930,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dffa4e7be957d2446b87b21d13439de4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConnectionPrefab: {fileID: 5806945198085100239, guid: 31f6d6356966c2e4bb045504a3741145,
+  ConnectionPrefab: {fileID: 120830425844978858, guid: 3aa2afe99f43b3f4296204ee145e8d9c,
     type: 3}
   Connections: []
   EnabledMaterial: {fileID: 2100000, guid: 605dbb58d4667314aa4913ada0902c4a, type: 2}

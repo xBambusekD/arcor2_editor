@@ -21,6 +21,9 @@ namespace Base {
         public object ifValue;
 
 
+        public ConnectionLine LineToConnection;
+
+
         public void AddLogicItem(string logicItemId) {
             Debug.Assert(logicItemId != null);
             logicItemIds.Add(logicItemId);

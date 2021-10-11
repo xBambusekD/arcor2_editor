@@ -33,6 +33,8 @@ namespace Base {
 
         public bool ActionsCollapsed;
 
+        public RectTransform Front, Rear;
+
         public virtual void Init(IO.Swagger.Model.Action projectAction, ActionMetadata metadata, ActionPoint ap, IActionProvider actionProvider) {
 
             ActionPoint = ap;
@@ -301,25 +303,46 @@ namespace Base {
         public void UpdateRotation() {
             if (Output.AnyConnection()) {
                 LogicItem c = Output.GetLogicItems()[0];
-                UpdateRotation(c.Input.Action);
+                UpdateRotation(c.Input.transform);
             } else {
                 UpdateRotation(null);
             }
 
             if (Input.AnyConnection()) {
                 LogicItem c = Input.GetLogicItems()[0];
-                c.Output.Action.UpdateRotation(this);
+                c.Output.Action.UpdateRotation(Output.transform);
             }
                 
         }
 
-        public void UpdateRotation(Base.Action otherAction) {
-            if (otherAction != null && (otherAction.transform.position - transform.position).magnitude > 0.0001) {
-                transform.rotation = Quaternion.LookRotation(otherAction.transform.position - transform.position);
+        public void UpdateRotation(Transform whereToLook) {
+            if (whereToLook != null && (whereToLook.position - transform.position).magnitude > 0.0001) {
+                transform.rotation = Quaternion.LookRotation(whereToLook.position - transform.position);
                 transform.localRotation = Quaternion.Euler(0, transform.localRotation.eulerAngles.y, 0);
             } else {
                 transform.rotation = GameManager.Instance.Scene.transform.rotation;
                 transform.Rotate(-90 * GameManager.Instance.Scene.transform.up);
+            }
+        }
+
+        public void UpdateConnections(bool updateConnectedAction = false) {
+            if (Input.AnyConnection()) {
+                //Input.transform.position = ClosestPointOnCircle(Input.GetConnectedTo().transform.position);
+                /*if (updateConnectedAction) {
+                    Action3D connectedAction = Input.GetConnectedTo();
+                    connectedAction.UpdateConnections();
+                }*/
+                Input.GetLogicItems()[0].GetConnection().UpdateConnection();
+                Input.LineToConnection.UpdateConnection();
+            }
+            if (Output.AnyConnection()) {
+                /*Output.transform.position = ClosestPointOnCircle(Output.GetConnectedTo().transform.position);
+                if (updateConnectedAction) {
+                    Action3D connectedAction = Output.GetConnectedTo();
+                    connectedAction.UpdateConnections();
+                }*/
+                Output.GetLogicItems()[0].GetConnection().UpdateConnection();
+                Output.LineToConnection.UpdateConnection();
             }
         }
 
