@@ -421,6 +421,7 @@ namespace Base {
             Valid = true;
             OnLoadProject?.Invoke(this, EventArgs.Empty);
             SetActionInputOutputVisibility(MainSettingsMenu.Instance.ConnectionsSwitch.IsOn());
+            AREditorResources.Instance.LeftMenuProject.StartAddActionMode();
             return true;
         }
 
@@ -509,8 +510,10 @@ namespace Base {
         private void OnLogicItemAdded(object sender, LogicItemChangedEventArgs args) {
             LogicItem logicItem = new LogicItem(args.Data);
             LogicItems.Add(args.Data.Id, logicItem);
-            ((Action3D) logicItem.Input.Action).UpdateConnections();
-            ((Action3D) logicItem.Output.Action).UpdateConnections();
+            if (logicItem.Input.Action != null)
+                ((Action3D) logicItem.Input.Action).UpdateConnections();
+            if (logicItem.Output.Action != null)
+                ((Action3D) logicItem.Output.Action).UpdateConnections();
         }
 
         /// <summary>

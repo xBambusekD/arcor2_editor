@@ -182,13 +182,19 @@ public class SelectorMenu : Singleton<SelectorMenu> {
                 if (!SelectorItems.ContainsKey(item.Item2.GetId())) {
                     continue;
                 }
-
-                SelectorItem selectorItem = selectorItemsAimMenu.Find(x => (x.InteractiveObject.GetId() == item.Item2.GetId()));
-                if (selectorItem == null) {
-                    selectorItem = item.Item2.SelectorItem;                    
-                    selectorItemsAimMenu.Add(selectorItem);
-                }                 
-                selectorItem.UpdateScore(item.Item1, iteration);
+                try {
+                    SelectorItem selectorItem = selectorItemsAimMenu.Find(x => (x.InteractiveObject.GetId() == item.Item2.GetId()));
+                    if (selectorItem == null) {
+                        selectorItem = item.Item2.SelectorItem;
+                        selectorItemsAimMenu.Add(selectorItem);
+                    }
+                    selectorItem.UpdateScore(item.Item1, iteration);
+                } catch (NullReferenceException) {
+                    Debug.LogError(item);
+                    Debug.LogError(item.Item2);
+                    continue;
+                }
+                
             }            
             ++iteration;
             
@@ -393,6 +399,8 @@ public class SelectorMenu : Singleton<SelectorMenu> {
 
         selectorItem.transform.localScale = Vector3.one;
         selectorItem.CollapsableButton.gameObject.SetActive(!ContainerAim.activeSelf);
+        if (interactiveObject is APOrientation)
+            selectorItem.gameObject.SetActive(false);
         return selectorItem;
     }
 

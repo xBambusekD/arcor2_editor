@@ -58,7 +58,7 @@ MonoBehaviour:
   OutlineHoverMaterial: {fileID: 2100000, guid: 93e96bf4f8c5dbb458a878182ad82748,
     type: 2}
   Renderers:
-  - {fileID: 0}
+  - {fileID: 4743374334506650804}
   HoverOnly: 0
 --- !u!114 &3902747425204088276
 MonoBehaviour:
@@ -242,6 +242,12 @@ GameObject:
 --- !u!4 &5879718761676060635 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 69766a80639024949afab08646844780,
+    type: 3}
+  m_PrefabInstance: {fileID: 6202103692412047408}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4743374334506650804 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 69766a80639024949afab08646844780,
     type: 3}
   m_PrefabInstance: {fileID: 6202103692412047408}
   m_PrefabAsset: {fileID: 0}

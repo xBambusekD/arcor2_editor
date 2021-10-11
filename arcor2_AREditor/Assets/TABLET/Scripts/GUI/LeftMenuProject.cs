@@ -52,6 +52,9 @@ public class LeftMenuProject : LeftMenu
         private set {
             currentMode = value;
             //SelectorMenuButton.interactable = currentMode == Mode.Normal;
+            /*switch (value) {
+                case Mode.
+            }*/
 
         }
     }
@@ -141,15 +144,15 @@ public class LeftMenuProject : LeftMenu
                                                                //close all other opened menus/dialogs and takes care of red background of buttons
             SetActiveSubmenu(LeftMenuSelection.None, true, true);
         }
-        if (ActionModeButton.GetComponent<Image>().enabled) {
+        //if (ActionModeButton.GetComponent<Image>().enabled) {
             //AddActionModeBtn.GetComponent<Image>().enabled = false;
             //RestoreSelector();
             //ActionPicker.SetActive(false);
 
             //CurrentMode = Mode.Normal;
-            SelectorMenu.Instance.Active = true;
-            SetActiveSubmenu(LeftMenuSelection.None, true, false);
-        } else {
+            //SelectorMenu.Instance.Active = true;
+            //SetActiveSubmenu(LeftMenuSelection.None, true, false);
+        //} else {
             ActionModeButton.GetComponent<Image>().enabled = true;
             RightButtonsMenu.Instance.gameObject.SetActive(true);
             SelectorMenu.Instance.gameObject.SetActive(false);
@@ -158,7 +161,7 @@ public class LeftMenuProject : LeftMenu
 
                 CurrentMode = Mode.AddAction;
             SelectorMenuButton.GetComponent<Image>().enabled = false;
-        }
+        //}
 
     }
 
@@ -168,99 +171,97 @@ public class LeftMenuProject : LeftMenu
             SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
         }
 
-        if (RemoveModeButton.GetComponent<Image>().enabled) {
+        /*if (RemoveModeButton.GetComponent<Image>().enabled) {
             //RemoveModeBtn.GetComponent<Image>().enabled = false;
             //RestoreSelector();
 
             //CurrentMode = Mode.Normal;
             SelectorMenu.Instance.Active = true;
             SetActiveSubmenu(LeftMenuSelection.None, true, false);
-        } else {
+        } else {*/
             RemoveModeButton.GetComponent<Image>().enabled = true;
             RightButtonsMenu.Instance.gameObject.SetActive(true);
             SelectorMenu.Instance.gameObject.SetActive(false);
             RightButtonsMenu.Instance.SetRemoveMode();
             CurrentMode = Mode.Remove;
             SelectorMenuButton.GetComponent<Image>().enabled = false;
-        }
+        //}
 
     }
 
     public void StartMoveMode() {
-        if (!MoveModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
-            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
-        }
-        if (MoveModeButton.GetComponent<Image>().enabled) {
+       SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+       
+        /*if (MoveModeButton.GetComponent<Image>().enabled) {
             //MoveModeButton.GetComponent<Image>().enabled = false;
             //RestoreSelector();
 
             //CurrentMode = Mode.Normal;
             SelectorMenu.Instance.Active = true;
             SetActiveSubmenu(LeftMenuSelection.None, true, false);
-        } else {
+        } else {*/
             MoveModeButton.GetComponent<Image>().enabled = true;
             RightButtonsMenu.Instance.gameObject.SetActive(true);
             SelectorMenu.Instance.gameObject.SetActive(false);
             RightButtonsMenu.Instance.SetMoveMode();
             CurrentMode = Mode.Move;
             SelectorMenuButton.GetComponent<Image>().enabled = false;
-        }
+        //}
 
     }
 
     public void StartRunMode() {
-        if (!RunModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
-            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
-        }
-        if (RunModeButton.GetComponent<Image>().enabled) {
+        SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        
+        /*if (RunModeButton.GetComponent<Image>().enabled) {
             //RunModeButton.GetComponent<Image>().enabled = false;
             //RestoreSelector();
 
             //CurrentMode = Mode.Normal;
             SelectorMenu.Instance.Active = true;
             SetActiveSubmenu(LeftMenuSelection.None, true, false);
-        } else {
+        } else {*/
             RunModeButton.GetComponent<Image>().enabled = true;
             RightButtonsMenu.Instance.gameObject.SetActive(true);
             SelectorMenu.Instance.gameObject.SetActive(false);
             RightButtonsMenu.Instance.SetRunMode();
             CurrentMode = Mode.Run;
             SelectorMenuButton.GetComponent<Image>().enabled = false;
-        }
+        //}
 
     }
 
     public void StartConnectionsMode() {
-        if (!ConnectionModeButton.GetComponent<Image>().enabled) { //other menu/dialog opened
-            SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
-        }
-        if (ConnectionModeButton.GetComponent<Image>().enabled) {
+        SetActiveSubmenu(LeftMenuSelection.None, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        
+        /*if (ConnectionModeButton.GetComponent<Image>().enabled) {
             ConnectionModeButton.GetComponent<Image>().enabled = false;
             //RestoreSelector();
 
             SelectorMenu.Instance.Active = true;
             SetActiveSubmenu(LeftMenuSelection.None, true, false);
-        } else {
+        } else {*/
             ConnectionModeButton.GetComponent<Image>().enabled = true;
             RightButtonsMenu.Instance.gameObject.SetActive(true);
             SelectorMenu.Instance.gameObject.SetActive(false);
             RightButtonsMenu.Instance.SetConnectionsMode();
             CurrentMode = Mode.Connections;
             SelectorMenuButton.GetComponent<Image>().enabled = false;
-        }
+       // }
 
     }
 
     public void SelectorMenuClick() {
-        if (!SelectorMenuButton.GetComponent<Image>().enabled) { //other menu/dialog opened
-            SetActiveSubmenu(CurrentSubmenuOpened, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
-        }
+       SetActiveSubmenu(CurrentSubmenuOpened, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+        
 
 
-        if (SelectorMenuButton.GetComponent<Image>().enabled) {
+        //if (!SelectorMenuButton.GetComponent<Image>().enabled) {
             SelectorMenu.Instance.Active = true;
             SetActiveSubmenu(LeftMenuSelection.Utility, true, false);
             SelectorMenu.Instance.gameObject.SetActive(true);
+            SelectorMenuButton.GetComponent<Image>().enabled = true;
+        RightButtonsMenu.Instance.gameObject.SetActive(false);
             /*
             if (TransformMenu.Instance.CanvasGroup.alpha > 0) {
                 TransformMenu.Instance.Hide();
@@ -271,12 +272,12 @@ public class LeftMenuProject : LeftMenu
                 SetActiveSubmenu(LeftMenuSelection.None);
                 SelectorMenu.Instance.DeselectObject();
             }*/
-        } else {
+        /*} else {
             SelectorMenuButton.GetComponent<Image>().enabled = true;
             RightButtonsMenu.Instance.gameObject.SetActive(false);
             SelectorMenu.Instance.gameObject.SetActive(true);
             SetActiveSubmenu(LeftMenuSelection.Utility);
-        }
+        }*/
     }
 
 

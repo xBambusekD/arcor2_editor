@@ -63,7 +63,9 @@ namespace Base {
 
             SelectorItem = SelectorMenu.Instance.CreateSelectorItem(this);
             OrientationsVisible = PlayerPrefsHelper.LoadBool("/AP/" + Data.Id + "/visible", true);
-            ActionsCollapsed = PlayerPrefsHelper.LoadBool("/AP/" + Data.Id + "/actionsCollapsed", false);
+            
+            ActionsCollapsed = PlayerPrefsHelper.LoadBool($"{ProjectManager.Instance.ProjectMeta.Id}/AP/{Data.Id}/collapsed", false);
+            SetApCollapsed(ActionsCollapsed);
             transform.localPosition = GetScenePosition();
             SetSize(size);
             if (Data.Actions == null)

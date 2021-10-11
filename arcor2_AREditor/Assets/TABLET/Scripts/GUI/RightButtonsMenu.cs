@@ -97,6 +97,9 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
             return;
         MoveBtn.SetInteractivity(move.Success, $"Move object\n({move.Message})");
         RemoveBtn.SetInteractivity(remove.Success, $"Remove object\n({remove.Message})");
+        if (selectedObject is Action3D action) {
+            MoveBtn.SetInteractivity(true);
+        }
     }
 
     public void SelectClick() {
@@ -114,10 +117,18 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
                 apId = action.ActionPoint.GetId();
             else
                 return;
+            try {
+                var actionPoint = ProjectManager.Instance.GetActionPoint(apId);
+                actionPoint.SetApCollapsed(!actionPoint.ActionsCollapsed);
+                OnObjectSelectedChangedEvent(this, new InteractiveObjectEventArgs(selectedObject));
+            } catch (KeyNotFoundException) {
+
+            }
+            /*
             if (SelectorMenu.Instance.SelectorItems.TryGetValue(apId, out SelectorItem selectorItem)) {
                 selectorItem.CollapseBtnCb();
                 OnObjectSelectedChangedEvent(this, new InteractiveObjectEventArgs(selectedObject));
-            }
+            }*/
         }
     }
 
@@ -274,7 +285,7 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
         if (selectedObject is Action3D action)
             obj = action.ActionPoint;
         //TransformMenu.Instance.Show(obj, selectedObject.GetType() == typeof(DummyAimBox) || selectedObject.GetType() == typeof(DummyAimBoxTester), selectedObject.GetType() == typeof(DummyAimBoxTester));
-        TransformMenu.Instance.Show(obj);
+        _ = TransformMenu.Instance.Show(obj);
     }
 
     public void RemoveClick() {
@@ -374,22 +385,15 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
         }
     }
 
-    public void RobotHandTeachingPush() {
-        if (selectedObject is RobotEE ee) {
-            robotEE = ee;
-        } else {
-            return;
-        }
-        if (SceneManager.Instance.SelectedRobot == null)
-            AREditorResources.Instance.LeftMenuProject.OpenRobotSelector();
+    public async void RobotHandTeachingPush() {
+        await SceneManager.Instance.SelectRobotAndEE();
+        robotEE = SceneManager.Instance.SelectedEndEffector;
         _ = WebsocketManager.Instance.HandTeachingMode(robotId: SceneManager.Instance.SelectedRobot.GetId(), enable: true);
     }
 
     public async void RobotHandTeachingRelease() {
-        if (robotEE == null)
-            return;
-        if (SceneManager.Instance.SelectedRobot == null)
-            AREditorResources.Instance.LeftMenuProject.OpenRobotSelector();
+        await SceneManager.Instance.SelectRobotAndEE();
+
         await WebsocketManager.Instance.HandTeachingMode(robotId: SceneManager.Instance.SelectedRobot.GetId(), enable: false);
         IO.Swagger.Model.Position position = DataHelper.Vector3ToPosition(TransformConvertor.UnityToROS(GameManager.Instance.Scene.transform.InverseTransformPoint(robotEE.transform.position)));
         await WebsocketManager.Instance.MoveToPose(SceneManager.Instance.SelectedRobot.GetId(), SceneManager.Instance.SelectedEndEffector.GetId(), 1, position, DataHelper.QuaternionToOrientation(Quaternion.Euler(180, 0, 0)));

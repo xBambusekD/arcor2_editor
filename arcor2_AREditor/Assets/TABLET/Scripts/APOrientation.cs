@@ -19,6 +19,10 @@ public class APOrientation : InteractiveObject, ISubItem {
     [SerializeField]
     private MeshRenderer renderer;
 
+    public override void Enable(bool enable, bool putOnBlocklist = false, bool removeFromBlocklist = false) {
+        enable = false;
+    }
+
 
     public override void OnClick(Click type) {
         if (GameManager.Instance.GetEditorState() != GameManager.EditorStateEnum.Normal) {

@@ -895,6 +895,11 @@ namespace Base {
             return ActionObjects.First().Value;
         }
 
+        public async Task SelectRobotAndEE() {
+            System.Collections.Generic.List<RobotEE> EEs = await GetAllRobotsEEs();
+            SelectRobotAndEE(EEs[0]);
+        }
+
         public void SetVisibilityActionObjects(float value) {
             foreach (ActionObject actionObject in ActionObjects.Values) {
                 actionObject.SetVisibility(value);

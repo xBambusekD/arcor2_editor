@@ -17,7 +17,7 @@ public class ConnectionLine : InteractiveObject {
     public void InitConnection(string logicItemId, string name) {
         LogicItemId = logicItemId;
         Name = name;
-
+        SelectorItem = SelectorMenu.Instance.CreateSelectorItem(this);
     }
 
 
@@ -87,7 +87,7 @@ public class ConnectionLine : InteractiveObject {
     }
 
     public override async Task<RequestResult> Removable() {
-        return new RequestResult(false);
+        return new RequestResult(true);
     }
 
     public async override void Remove() {

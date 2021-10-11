@@ -195,6 +195,7 @@ public abstract class LeftMenu : MonoBehaviour {
         MoveButton.SetInteractivity(move.Success, $"{MOVE_BTN_LABEL}\n({move.Message})");
         MoveButton2.SetInteractivity(move.Success, $"{MOVE_BTN_LABEL}\n({move.Message})");
         RemoveButton.SetInteractivity(remove.Success, $"{REMOVE_BTN_LABEL}\n({remove.Message})");
+        
     }
 
     private bool updateButtonsInteractivity = false;

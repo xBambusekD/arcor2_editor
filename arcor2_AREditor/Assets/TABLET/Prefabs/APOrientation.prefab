@@ -46,13 +46,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7993e311ac3a2b346ab7dcb1585fa8d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enabled: 1
+  Enabled: 0
   SelectorItem: {fileID: 0}
   Colliders:
   - {fileID: 1138759833440681489}
   ActionPoint: {fileID: 0}
   OrientationId: 
   outlineOnClick: {fileID: 3977943581295511037}
+  renderer: {fileID: 0}
 --- !u!114 &3977943581295511037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,6 +194,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Arrow
+      objectReference: {fileID: 0}
+    - target: {fileID: 8636268259890015400, guid: b4e538696a8355b4f95165a806cc9e1b,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8636268259890015400, guid: b4e538696a8355b4f95165a806cc9e1b,
         type: 3}
