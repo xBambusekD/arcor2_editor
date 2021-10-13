@@ -26,4 +26,12 @@ public class CollisionObject : ActionObject3D
         }
     }
 
+    public override async Task<RequestResult> Movable() {
+        return new RequestResult(true);
+    }
+
+    public override async Task<RequestResult> Removable() {
+        return new RequestResult(true);
+    }
+
 }

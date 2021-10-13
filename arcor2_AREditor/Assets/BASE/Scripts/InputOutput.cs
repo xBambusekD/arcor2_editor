@@ -11,7 +11,6 @@ using RosSharp.RosBridgeClient.MessageTypes.Nav;
 
 namespace Base {
     [RequireComponent(typeof(OutlineOnClick))]
-    [RequireComponent(typeof(Target))]
     public abstract class InputOutput : MonoBehaviour, ISubItem {
         public Action Action;
         private List<string> logicItemIds = new List<string>();

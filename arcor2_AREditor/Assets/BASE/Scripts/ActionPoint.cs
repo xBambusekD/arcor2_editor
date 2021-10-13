@@ -240,6 +240,7 @@ namespace Base {
 
         public void SetApCollapsed(bool collapsed) {
             ActionsCollapsed = collapsed;
+            
             UpdatePositionsOfPucks();
             PlayerPrefsHelper.SaveBool($"{ProjectManager.Instance.ProjectMeta.Id}/AP/{GetId()}/collapsed", collapsed);
         }

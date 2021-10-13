@@ -16,7 +16,7 @@ public class LeftMenuScene : LeftMenu
 
     //public GameObject MeshPicker;
 
-    public ButtonWithTooltip CreateProjectBtn, AddNewCollisionObjectButton, ActionObjectAimingMenuButton;
+    public ButtonWithTooltip CreateProjectBtn, AddNewCollisionObjectButton;
 
     public InputDialogWithToggle InputDialogWithToggle;
 
@@ -35,7 +35,7 @@ public class LeftMenuScene : LeftMenu
         GameManager.Instance.OnGameStateChanged += OnGameStateChanged;
         GameManager.Instance.OnEditorStateChanged += OnEditorStateChanged;
         SelectorMenu.Instance.OnObjectSelectedChangedEvent += OnObjectSelectedChangedEvent;
-        ActionObjectAimingMenuButton.SetDescription(AIMING_MENU_BTN_LABEL);
+       // ActionObjectAimingMenuButton.SetDescription(AIMING_MENU_BTN_LABEL);
         AddActionObjectButton.SetDescription(ADD_ACTION_OBJECT_BTN_LABEL);
     }
     protected override void Update() {
@@ -79,27 +79,27 @@ public class LeftMenuScene : LeftMenu
 #endif
             if (requestingObject || obj == null) {
                 SelectedObjectText.text = "";
-                ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(no object selected)");
+               // ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(no object selected)");
                 CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(no object selected)");
             } else if (obj.IsLocked && obj.LockOwner != LandingScreen.Instance.GetUsername()) {
-                ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(the object is used by {obj.LockOwner})");
+               // ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(the object is used by {obj.LockOwner})");
                 CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(the object is used by {obj.LockOwner})");
 
             } else {
                 if (obj is ActionObject actionObject) {
                     if (!SceneManager.Instance.SceneStarted) {
-                        ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(only available when online)");
+                      //  ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(only available when online)");
                     } else if (!actionObject.ActionObjectMetadata.HasPose) {
-                        ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(not available for objects without pose)");
+                      //  ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(not available for objects without pose)");
                         CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(not available for objects without pose)");
                     } else {
-                        ActionObjectAimingMenuButton.SetInteractivity(true);
+                      //  ActionObjectAimingMenuButton.SetInteractivity(true);
                         CopyButton.SetInteractivity(true);
                     }
 
                     CopyButton.SetInteractivity(!SceneManager.Instance.SceneStarted, $"{COPY_LABEL}\n(only available when offline)");
                 } else {
-                    ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(selected object is not action object)");
+                   // ActionObjectAimingMenuButton.SetInteractivity(false, $"{AIMING_MENU_BTN_LABEL}\n(selected object is not action object)");
                     CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(selected object is not action object)");
                 }
             }
@@ -118,7 +118,7 @@ public class LeftMenuScene : LeftMenu
         base.DeactivateAllSubmenus(unlock);
         AddActionObjectButton.GetComponent<Image>().enabled = false;
         AddNewCollisionObjectButton.GetComponent<Image>().enabled = false;
-        ActionObjectAimingMenuButton.GetComponent<Image>().enabled = false;
+      //  ActionObjectAimingMenuButton.GetComponent<Image>().enabled = false;
 
         ActionObjectPickerMenu.Instance.Hide();
         NewObjectTypeMenu.Instance.Hide();
@@ -328,7 +328,7 @@ public class LeftMenuScene : LeftMenu
             SelectorMenu.Instance.gameObject.SetActive(false);
         }
     }
-
+    /*
     public void ActionObjectAimingMenuClick() {
         if (CheckActionObjectAiming())
             return;
@@ -355,7 +355,7 @@ public class LeftMenuScene : LeftMenu
                 SelectorMenu.Instance.gameObject.SetActive(false);
             }
         }        
-    }
+    }*/
 
     private bool CheckActionObjectAiming() {
         if (ActionObjectAimingMenu.Instance.AimingInProgress) {

@@ -31,7 +31,7 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
 
     private void OnButtonObjectSelectedChangedEvent(object sender, ButtonInteractiveObjectEventArgs args) {
         selectedButton = args.InteractiveObject;
-        MenuTriggerBtn.SetInteractivity(selectedButton != null, "No item selected");
+        MenuTriggerBtn.SetInteractivity(selectedButton != null, "Žádná položka není vybraná");
     }
 
     private void OnObjectSelectedChangedEvent(object sender, InteractiveObjectEventArgs args) {
@@ -56,13 +56,13 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
                 }
                 if (actionPoint.ActionsCollapsed) {
                     CollapseBtn.GetComponent<IconButton>().Icon.sprite = UncollapseIcon;
-                    CollapseBtn.SetDescription("Show actions");
+                    CollapseBtn.SetDescription("Zobrazit akce");
                 } else {
                     CollapseBtn.GetComponent<IconButton>().Icon.sprite = CollapseIcon;
-                    CollapseBtn.SetDescription("Hide actions");
+                    CollapseBtn.SetDescription("Schovat akce");
                 }
             } else {
-                CollapseBtn.SetInteractivity(false, "Selected object is not action point");
+                CollapseBtn.SetInteractivity(false, "Vybraný objekt není akční bod nebo akce");
             }
             Task<RequestResult> tMove = Task.Run(() => selectedObject.Movable());
             Task<RequestResult> tRemove = Task.Run(() => selectedObject.Removable());
@@ -78,11 +78,11 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
             else
                 RobotHandBtn.color = new Color(1, 1, 1, 0.4f);
         } else {
-            CollapseBtn.SetInteractivity(false, "No object selected");
-            SelectBtn.SetInteractivity(false, "No object selected");
-            RemoveBtn.SetInteractivity(false, "No object selected");
-            MoveBtn.SetInteractivity(false, "No object selected");
-            ExecuteBtn.SetInteractivity(false, "No object selected");
+            CollapseBtn.SetInteractivity(false, "Žádný vybraný objekt");
+            SelectBtn.SetInteractivity(false, "Žádný vybraný objekt");
+            RemoveBtn.SetInteractivity(false, "Žádný vybraný objekt");
+            MoveBtn.SetInteractivity(false, "Žádný vybraný objekt");
+            ExecuteBtn.SetInteractivity(false, "Žádný vybraný objekt");
             AddActionBtn.SetInteractivity(true);
             RobotHandBtn.color = new Color(1, 1, 1, 0.4f);
         }
@@ -95,8 +95,8 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
 
         if (selectedObject != null && objId != selectedObject.GetId()) // selected object was updated in the meantime
             return;
-        MoveBtn.SetInteractivity(move.Success, $"Move object\n({move.Message})");
-        RemoveBtn.SetInteractivity(remove.Success, $"Remove object\n({remove.Message})");
+        MoveBtn.SetInteractivity(move.Success, $"Manipulovat s objektem\n({move.Message})");
+        RemoveBtn.SetInteractivity(remove.Success, $"Odstranit objekt\n({remove.Message})");
         if (selectedObject is Action3D action) {
             MoveBtn.SetInteractivity(true);
         }
@@ -133,7 +133,8 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
     }
 
     public void TriggerClick() {
-        selectedButton.OnClick(Clickable.Click.MOUSE_LEFT_BUTTON);
+        if (selectedButton != null)
+            selectedButton.OnClick(Clickable.Click.MOUSE_LEFT_BUTTON);
     }
 
     public void AddAction() {

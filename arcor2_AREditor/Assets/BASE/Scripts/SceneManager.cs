@@ -896,6 +896,19 @@ namespace Base {
         }
 
         public async Task SelectRobotAndEE() {
+
+            if (!SceneStarted) {
+                try {
+                    GameManager.Instance.ShowLoadingScreen("Startuji robota...");
+                    await WebsocketManager.Instance.StartScene(false);
+                } catch (RequestFailedException) {
+                    Notifications.Instance.ShowNotification("Scéna nešla nastartovat.", "");
+
+                } finally {
+                    GameManager.Instance.HideLoadingScreen();
+                }
+            }
+                
             System.Collections.Generic.List<RobotEE> EEs = await GetAllRobotsEEs();
             SelectRobotAndEE(EEs[0]);
         }

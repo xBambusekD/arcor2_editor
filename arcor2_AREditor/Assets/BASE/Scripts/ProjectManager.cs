@@ -6,6 +6,7 @@ using System;
 
 using IO.Swagger.Model;
 using System.Linq;
+using System.Threading;
 
 namespace Base {
     /// <summary>
@@ -341,23 +342,30 @@ namespace Base {
                   "default", "default");*/
                 try {
                     await ap.WriteLock(true);
-                    await WebsocketManager.Instance.AddActionPointOrientation(ap.GetId(), DataHelper.QuaternionToOrientation(Quaternion.Euler(180, 0, 0)), "default");
+                    if (!ap.AnyOrientation())
+                        await WebsocketManager.Instance.AddActionPointOrientation(ap.GetId(), DataHelper.QuaternionToOrientation(Quaternion.Euler(180, 0, 0)), "default");
                     
                     if (MoveApToRobot != null) {
                         await WebsocketManager.Instance.UpdateActionPointUsingRobot(ap.GetId(), MoveApToRobot.Robot.GetId(), MoveApToRobot.EEId);
                     }
-                    await ap.WriteUnlock();
+                    
 
                 } catch (RequestFailedException) {
+                } finally {                    
+                    await ap.WriteUnlock();
                 }
                 if (!string.IsNullOrEmpty(SelectAPNameWhenCreated) && data.ActionPoint.Name.Contains(SelectAPNameWhenCreated))
                     RightButtonsMenu.Instance.MoveClick();
                 SelectAPNameWhenCreated = "";
-                AREditorResources.Instance.LeftMenuProject.ActionCb.Invoke((ActionPoint3D) ap);
-                AREditorResources.Instance.LeftMenuProject.ActionCb = null;
+                if (AREditorResources.Instance.LeftMenuProject.ActionCb != null) {
+                    AREditorResources.Instance.LeftMenuProject.ActionCb.Invoke((ActionPoint3D) ap);
+                    AREditorResources.Instance.LeftMenuProject.ActionCb = null;
+                }
                 //await WebsocketManager.Instance.AddActionPointOrientationUsingRobot(ap.GetId(), DataHelper.QuaternionToOrientation(Quaternion.Euler(180, 0, 0)), "def");
+
             }
             updateProject = true;
+
         }
 
         private void OnProjectBaseUpdated(object sender, BareProjectEventArgs args) {
@@ -422,6 +430,10 @@ namespace Base {
             OnLoadProject?.Invoke(this, EventArgs.Empty);
             SetActionInputOutputVisibility(MainSettingsMenu.Instance.ConnectionsSwitch.IsOn());
             AREditorResources.Instance.LeftMenuProject.StartAddActionMode();
+           /* if (!SceneManager.Instance.SceneStarted)
+                await WebsocketManager.Instance.StartScene(false);
+            await SceneManager.Instance.SelectRobotAndEE();*/
+            
             return true;
         }
 
@@ -511,9 +523,9 @@ namespace Base {
             LogicItem logicItem = new LogicItem(args.Data);
             LogicItems.Add(args.Data.Id, logicItem);
             if (logicItem.Input.Action != null)
-                ((Action3D) logicItem.Input.Action).UpdateConnections();
+                logicItem.Input.Action.UpdateConnections();
             if (logicItem.Output.Action != null)
-                ((Action3D) logicItem.Output.Action).UpdateConnections();
+                logicItem.Output.Action.UpdateConnections();
         }
 
         /// <summary>
@@ -624,6 +636,11 @@ namespace Base {
             actionPoint.InitAP(apData, APSize, actionPointParent);
             ActionPoints.Add(actionPoint.Data.Id, actionPoint);
             OnActionPointAddedToScene?.Invoke(this, new ActionPointEventArgs(actionPoint));
+
+            ((ActionPoint3D) actionPoint).SetRotation(((ActionPoint3D) actionPoint).GetRotation());
+            foreach (Action action in actionPoint.Actions.Values) {
+                action.UpdateRotation(null);
+            }
             return actionPoint;
         }
 
@@ -1244,9 +1261,19 @@ namespace Base {
                     ActionToSelect = "";
                 }
                 if (!string.IsNullOrEmpty(PrevAction) && !string.IsNullOrEmpty(NextAction)) {
-                    await WebsocketManager.Instance.AddLogicItem(PrevAction, action.GetId(), null, false);
-                    await WebsocketManager.Instance.AddLogicItem(action.GetId(), NextAction, null, false);
-                    PrevAction = NextAction = null;
+                    int timeout = 0;
+                    while (!await action.WriteLock(false) && timeout < 20) {
+                        //wait
+                        Thread.Sleep(50);
+                        ++timeout;
+                    }
+                    Debug.Log(timeout);
+                        await WebsocketManager.Instance.AddLogicItem(PrevAction, action.GetId(), null, false);
+                        await WebsocketManager.Instance.AddLogicItem(action.GetId(), NextAction, null, false);
+                      //  await action.WriteUnlock();
+                        PrevAction = NextAction = null;
+                   //}
+                    
                 } else if (LastAddedAPs.Count >= 2) {
                     for (int i = LastAddedAPs.Count() - 2; i >= 0; --i) {
                         Action a;
@@ -1255,8 +1282,18 @@ namespace Base {
                         else
                             a = StartAction;
                         if (!a.Output.AnyConnection()) {
+                            int timeout = 0;
+                            while (!await action.WriteLock(false) && timeout < 20) {
+                                //wait
+                                Thread.Sleep(50);
+                                ++timeout;
+                            }
+                            Debug.Log(timeout);
+                            //  if (await action.WriteLock(false)) {
                             await WebsocketManager.Instance.AddLogicItem(LastAddedAPs[i], action.GetId(), null, false);
-                            break;
+                             //   await action.WriteUnlock();
+                           // }
+                        break;
                         }
                     }
                 }

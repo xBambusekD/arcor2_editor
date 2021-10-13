@@ -47,9 +47,13 @@ public class LogicItem
             GameObject.Destroy(Input.LineToConnection.gameObject);
         if (Output.LineToConnection != null)
             GameObject.Destroy(Output.LineToConnection.gameObject);
-        Input.LineToConnection = GameObject.Instantiate(ConnectionManagerArcoro.Instance.ConnectionPrefab).GetComponent<ConnectionLine>();
+        Input.LineToConnection = GameObject.Instantiate(ConnectionManagerArcoro.Instance.ConnectionPrefab, Input.Action.transform).GetComponent<ConnectionLine>();
+        foreach (Collider c in Input.LineToConnection.Colliders)
+            c.enabled = false;
         Input.LineToConnection.SetTargets(Input.transform.GetComponent<RectTransform>(), Input.Action.Rear);
-        Output.LineToConnection = GameObject.Instantiate(ConnectionManagerArcoro.Instance.ConnectionPrefab).GetComponent<ConnectionLine>();
+        Output.LineToConnection = GameObject.Instantiate(ConnectionManagerArcoro.Instance.ConnectionPrefab, Output.Action.transform).GetComponent<ConnectionLine>();
+        foreach (Collider c in Output.LineToConnection.Colliders)
+            c.enabled = false;
         Output.LineToConnection.SetTargets(Output.Action.Front, Output.transform.GetComponent<RectTransform>());
     }
 

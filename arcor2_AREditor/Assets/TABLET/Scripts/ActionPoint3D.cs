@@ -65,7 +65,7 @@ public class ActionPoint3D : Base.ActionPoint {
 
     public override Quaternion GetSceneOrientation() {
         //return TransformConvertor.ROSToUnity(DataHelper.OrientationToQuaternion(Data.Orientations[0].Orientation));
-        return new Quaternion();
+        return GetRotation();
     }
 
     public override void SetSceneOrientation(Quaternion orientation) {
@@ -173,6 +173,8 @@ public class ActionPoint3D : Base.ActionPoint {
         base.InitAP(apData, size, parent);
         sphereMaterial = Sphere.GetComponent<Renderer>().material;
         ActionPointName.text = apData.Name;
+
+        
     }
 
     public override void UpdateColor() {
@@ -254,5 +256,25 @@ public class ActionPoint3D : Base.ActionPoint {
 
     public override void EnableVisual(bool enable) {
         Visual.SetActive(enable);
+    }
+
+    /// <summary>
+    /// Sets rotation of AP in unity coord system
+    /// </summary>
+    /// <param name="quaternion"></param>
+    public void SetRotation(Quaternion quaternion) {
+        PlayerPrefsHelper.SaveQuaternion(GetId(), quaternion);
+        transform.localRotation = quaternion;
+    }
+
+    /// <summary>
+    /// Gets rotation of AP in unity coord system
+    /// </summary>
+    /// <param name="quaternion"></param>
+    public Quaternion GetRotation() {
+        Debug.LogError(GetName());
+        Debug.LogError(GetId());
+        Debug.LogError(PlayerPrefsHelper.LoadQuaternion(GetId(), Quaternion.identity));
+        return PlayerPrefsHelper.LoadQuaternion(GetId(), Quaternion.identity);
     }
 }

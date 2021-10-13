@@ -55,7 +55,6 @@ GameObject:
   - component: {fileID: 6973890472729488529}
   - component: {fileID: 4512397415820150178}
   - component: {fileID: 533091770654837736}
-  - component: {fileID: 6825129210883962109}
   m_Layer: 0
   m_Name: Input
   m_TagString: Untagged
@@ -71,7 +70,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1030236983171118047}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.0384}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01725}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2749490816313433896}
@@ -128,24 +127,6 @@ MonoBehaviour:
   Renderers:
   - {fileID: 0}
   HoverOnly: 1
---- !u!114 &6825129210883962109
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1030236983171118047}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5dd462da48ed9b49a885f1a9cf94fe1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetColor: {r: 1, g: 1, b: 0, a: 1}
-  needBoxIndicator: 0
-  needArrowIndicator: 1
-  needDistanceText: 0
-  targetGameObject: {fileID: 0}
-  indicator: {fileID: 0}
 --- !u!1 &1928840962475440285
 GameObject:
   m_ObjectHideFlags: 0
@@ -170,7 +151,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1928840962475440285}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0264}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0132}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2749490816313433896}
@@ -355,6 +336,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 1
   m_renderer: {fileID: 4524046482305262798}
   m_maskType: 0
+  _SortingLayer: 0
   _SortingLayerID: 0
   _SortingOrder: 0
 --- !u!114 &7576348849702125217
@@ -416,7 +398,6 @@ GameObject:
   - component: {fileID: 8041926232856530573}
   - component: {fileID: 6585983383530919065}
   - component: {fileID: 6413523117402831350}
-  - component: {fileID: 352847646220829073}
   m_Layer: 0
   m_Name: Output
   m_TagString: Untagged
@@ -432,7 +413,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4605352205466647572}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0282}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0207}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2749490816313433896}
@@ -489,24 +470,6 @@ MonoBehaviour:
   Renderers:
   - {fileID: 0}
   HoverOnly: 1
---- !u!114 &352847646220829073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4605352205466647572}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a5dd462da48ed9b49a885f1a9cf94fe1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetColor: {r: 1, g: 1, b: 0, a: 1}
-  needBoxIndicator: 0
-  needArrowIndicator: 1
-  needDistanceText: 0
-  targetGameObject: {fileID: 0}
-  indicator: {fileID: 0}
 --- !u!1 &5577535146081185099
 GameObject:
   m_ObjectHideFlags: 0
@@ -531,7 +494,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5577535146081185099}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.0172}
+  m_LocalPosition: {x: 0, y: 0, z: -0.00824}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2749490816313433896}
@@ -677,7 +640,7 @@ Transform:
   m_GameObject: {fileID: 6417292781798665001}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.52343, y: 0.52343, z: 0.52343}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_Children:
   - {fileID: 8930780947998332613}
   - {fileID: 2270951845917346111}

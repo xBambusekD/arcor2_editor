@@ -44,7 +44,6 @@ namespace Base {
             UpdateName(Data.Name);
             if (actionProvider != null)
                 UpdateType();
-            UpdateRotation(null);
             SelectorItem = SelectorMenu.Instance.CreateSelectorItem(this);
         }
 

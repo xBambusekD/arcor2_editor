@@ -16,7 +16,7 @@ public class LeftMenuProject : LeftMenu
 
     public ButtonWithTooltip SetActionPointParentButton, AddActionButton, AddActionButton2, RunButton, RunButton2,
         AddConnectionButton, AddConnectionButton2, BuildPackageButton, AddActionPointUsingRobotButton, AddActionPointButton,
-        AddActionPointButton2, ActionPointAimingMenuButton;
+        AddActionPointButton2, AddNewObjectButton;
 
     public InputDialog InputDialog;
     public AddNewActionDialog AddNewActionDialog;
@@ -28,7 +28,7 @@ public class LeftMenuProject : LeftMenu
 
     public string ApToAddActionName = null;
 
-    public GameObject ActionPicker;
+    public GameObject ActionPicker, MeshPicker;
     protected override void Update() {
         base.Update();
         if (ProjectManager.Instance.ProjectMeta != null)
@@ -60,17 +60,19 @@ public class LeftMenuProject : LeftMenu
     }
 
 
-    private const string SET_ACTION_POINT_PARENT_LABEL = "Set action point parent";
+    private const string SET_ACTION_POINT_PARENT_LABEL = "Upravit hierarchii";
     private const string ADD_ACTION_LABEL = "Add action";
     private const string ADD_CONNECTION_LABEL = "Add connection";
     private const string EDIT_CONNECTION_LABEL = "Edit connection";
-    private const string RUN_ACTION_LABEL = "Execute action";
-    private const string RUN_ACTION_OR_PACKAGE_LABEL = "Execute action or temporary package";
-    private const string RUN_TEMP_PACKAGE_LABEL = "Create and execute temporary package";
+    private const string RUN_ACTION_LABEL = "Spustit akci";
+    private const string RUN_ACTION_POINT_LABEL = "Přesunout robota na tuto pozici";
+    private const string RUN_ACTION_OR_PACKAGE_LABEL = "Spustit akci nebo program";
+    private const string RUN_TEMP_PACKAGE_LABEL = "Spustit program";
     private const string ADD_ACTION_POINT_GLOBAL_LABEL = "Add global action point";
     private const string ADD_ACTION_POINT_LABEL = "Add action point";
     private const string ACTION_POINT_AIMING_LABEL = "Open action point aiming menu";
     private const string ADD_ACTION_POINT_USING_ROBOT_LABEL = "Add action point using robot";
+    private const string ADD_NEW_OBJECT_LABEL = "Přidat nový objekt";
     
 
     protected override void Start() {
@@ -252,13 +254,13 @@ public class LeftMenuProject : LeftMenu
     }
 
     public void SelectorMenuClick() {
-       SetActiveSubmenu(CurrentSubmenuOpened, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
+       //SetActiveSubmenu(CurrentSubmenuOpened, true, true); //close all other opened menus/dialogs and takes care of red background of buttons
         
 
 
         //if (!SelectorMenuButton.GetComponent<Image>().enabled) {
             SelectorMenu.Instance.Active = true;
-            SetActiveSubmenu(LeftMenuSelection.Utility, true, false);
+            SetActiveSubmenu(LeftMenuSelection.Utility, true, true);
             SelectorMenu.Instance.gameObject.SetActive(true);
             SelectorMenuButton.GetComponent<Image>().enabled = true;
         RightButtonsMenu.Instance.gameObject.SetActive(false);
@@ -301,24 +303,27 @@ public class LeftMenuProject : LeftMenu
                 AddActionPointButton.SetInteractivity(false, $"{ADD_ACTION_POINT_LABEL}\n(AR not calibrated)");
                 AddActionPointButton2.SetInteractivity(false, $"{ADD_ACTION_POINT_LABEL}\n(AR not calibrated)");
                 CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(AR not calibrated");
-                ActionPointAimingMenuButton.SetInteractivity(false, $"{ACTION_POINT_AIMING_LABEL}\n(AR not calibrated)");
+                //ActionPointAimingMenuButton.SetInteractivity(false, $"{ACTION_POINT_AIMING_LABEL}\n(AR not calibrated)");
+                AddNewObjectButton.SetInteractivity(false, $"{ADD_NEW_OBJECT_LABEL}\n(AR not calibrated)");
             }
             else
 #endif
+            AddNewObjectButton.SetInteractivity(false, $"{ADD_NEW_OBJECT_LABEL}\n(no object could be selected)");
             if (requestingObject || obj == null) {
-                SetActionPointParentButton.SetInteractivity(false, $"{SET_ACTION_POINT_PARENT_LABEL}\n(no action point is selected)");
+                SetActionPointParentButton.SetInteractivity(false, $"{SET_ACTION_POINT_PARENT_LABEL}\n(není vybraný žádný akční bod)");
                 AddActionButton.SetInteractivity(false, $"{ADD_ACTION_LABEL}\n(no action point is selected)");
                 AddActionButton2.SetInteractivity(false, $"{ADD_ACTION_LABEL}\n(no action point is selected)");
                 AddConnectionButton.SetInteractivity(false, $"{ADD_CONNECTION_LABEL}\n(no input / output is selected)");
                 AddConnectionButton2.SetInteractivity(false, $"{ADD_CONNECTION_LABEL}\n(no input / output is selected)");
-                RunButton.SetInteractivity(false, $"{RUN_ACTION_OR_PACKAGE_LABEL}\n(select action to execute it or START to run project)");
+                RunButton.SetInteractivity(false, $"{RUN_ACTION_OR_PACKAGE_LABEL}\n(vyberte akci, akční bod nebo START)");
                 RunButton2.SetInteractivity(false, RunButton.GetAlternativeDescription());
                 AddActionPointButton.SetInteractivity(true);
                 AddActionPointButton2.SetInteractivity(true);
                 AddActionPointButton.SetDescription(ADD_ACTION_POINT_GLOBAL_LABEL);
                 AddActionPointButton2.SetDescription(ADD_ACTION_POINT_GLOBAL_LABEL);
-                CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(no object to duplicate selected)");
-                ActionPointAimingMenuButton.SetInteractivity(false, $"{ACTION_POINT_AIMING_LABEL}\n(no action point selected)");
+                CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(vybraný objekt nemůže být duplikován)");
+                AddNewObjectButton.SetInteractivity(true);
+                //ActionPointAimingMenuButton.SetInteractivity(false, $"{ACTION_POINT_AIMING_LABEL}\n(no action point selected)");
             } else if (obj.IsLocked && obj.LockOwner != LandingScreen.Instance.GetUsername()) {
                 SetActionPointParentButton.SetInteractivity(false, $"{SET_ACTION_POINT_PARENT_LABEL}\n(object is used by {obj.LockOwner})");
                 AddConnectionButton.SetInteractivity(false, $"{ADD_CONNECTION_LABEL}\n(object is used by {obj.LockOwner})");
@@ -328,9 +333,9 @@ public class LeftMenuProject : LeftMenu
                 AddActionButton.SetInteractivity(false, $"{ADD_ACTION_POINT_LABEL}\n(object is used by {obj.LockOwner})");
                 AddActionButton2.SetInteractivity(false, $"{ADD_ACTION_POINT_LABEL}\n(object is used by {obj.LockOwner})");
                 CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(object is used by {obj.LockOwner})");
-                ActionPointAimingMenuButton.SetInteractivity(false, $"{ACTION_POINT_AIMING_LABEL}\n(object is used by {obj.LockOwner})");
+                //ActionPointAimingMenuButton.SetInteractivity(false, $"{ACTION_POINT_AIMING_LABEL}\n(object is used by {obj.LockOwner})");
             } else {
-                SetActionPointParentButton.SetInteractivity(obj is ActionPoint3D, $"{SET_ACTION_POINT_PARENT_LABEL}\n(selected object is not action point)");
+                SetActionPointParentButton.SetInteractivity(obj is ActionPoint3D, $"{SET_ACTION_POINT_PARENT_LABEL}\n(vybraný objekt není akční bod)");
                 if (obj is ActionPoint3D) {
                     AddActionButton.SetInteractivity(ProjectManager.Instance.AnyAvailableAction, $"{ADD_ACTION_LABEL}\n(no actions available)");
                     AddActionButton2.SetInteractivity(ProjectManager.Instance.AnyAvailableAction, $"{ADD_ACTION_LABEL}\n(no actions available)");
@@ -338,20 +343,20 @@ public class LeftMenuProject : LeftMenu
                     AddActionButton.SetInteractivity(false, $"{ADD_ACTION_LABEL}\n(selected object is not action point)");
                     AddActionButton2.SetInteractivity(false, $"{ADD_ACTION_LABEL}\n(selected object is not action point)");
                 }
-                ActionPointAimingMenuButton.SetInteractivity(obj is ActionPoint3D || obj is APOrientation, $"{ACTION_POINT_AIMING_LABEL}\n(selected object is not action point or orientation)");
+               // ActionPointAimingMenuButton.SetInteractivity(obj is ActionPoint3D || obj is APOrientation, $"{ACTION_POINT_AIMING_LABEL}\n(selected object is not action point or orientation)");
                 if (obj is IActionPointParent) {
                     AddActionPointButton.SetDescription($"Add AP relative to {obj.GetName()}");
                     AddActionPointButton.SetInteractivity(true);
                 } else {
-                    AddActionPointButton.SetInteractivity(false, $"{ADD_ACTION_POINT_LABEL}\n(selected object could not be parent of AP");
+                    AddActionPointButton.SetInteractivity(false, $"{ADD_ACTION_POINT_LABEL}\n(vybraný objekt nemůže být předek akčního bodu");
                 }
                 AddActionPointButton2.SetInteractivity(AddActionPointButton.IsInteractive(), $"{ADD_ACTION_POINT_LABEL}\n({AddActionPointButton.GetAlternativeDescription()})");
                 AddActionPointButton2.SetDescription(AddActionPointButton.GetDescription());
                 if (obj is ActionPoint3D) {
-                    CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(checking...)");
+                    CopyButton.SetInteractivity(false, $"{COPY_LABEL}\n(kontroluji...)");
                     WebsocketManager.Instance.CopyActionPoint(obj.GetId(), null, obj.GetName(), CopyActionPointDryRunCallback, true);
                 } else {
-                    CopyButton.SetInteractivity(obj is Base.Action && !(obj is StartEndAction), $"{COPY_LABEL}\n(selected object cannot be duplicated)");
+                    CopyButton.SetInteractivity(obj is Base.Action && !(obj is StartEndAction), $"{COPY_LABEL}\n(vybraný objekt nemůže být duplikován)");
                 }
                 if (!MainSettingsMenu.Instance.ConnectionsSwitch.IsOn()) {
                     AddConnectionButton.SetInteractivity(false, $"{ADD_CONNECTION_LABEL}\n(connections are hidden)");
@@ -359,7 +364,7 @@ public class LeftMenuProject : LeftMenu
                 } else {
                     if (obj is Base.Action) {
                         if (obj is EndAction) {
-                            AddConnectionButton.SetInteractivity(false, $"{ADD_CONNECTION_LABEL}\n(end action could not be connected to anything else)");
+                            AddConnectionButton.SetInteractivity(false, $"{ADD_CONNECTION_LABEL}\n(poslední akce už nemůže být k ničemu připojena)");
                         } else {
                             AddConnectionButton.SetInteractivity(true);
                         }
@@ -372,10 +377,10 @@ public class LeftMenuProject : LeftMenu
 
                 if (obj.GetType() == typeof(Action3D)) {
                     if (!SceneManager.Instance.SceneStarted)
-                        runBtnInteractivity = "scene offline";
+                        runBtnInteractivity = "offline";
                     else if (!string.IsNullOrEmpty(GameManager.Instance.ExecutingAction)) {
                         string actionName = ProjectManager.Instance.GetAction(GameManager.Instance.ExecutingAction).GetName();
-                        runBtnInteractivity = $"action '{actionName}' running";
+                        runBtnInteractivity = $"akce '{actionName}' právě běží";
                     }
                     RunButton.SetDescription(RUN_ACTION_LABEL);
                     RunButton2.SetDescription(RUN_ACTION_LABEL);
@@ -384,15 +389,15 @@ public class LeftMenuProject : LeftMenu
                 } else if (obj.GetType() == typeof(StartAction)) {
                     if (!ProjectManager.Instance.ProjectMeta.HasLogic) {
                         runBtnInteractivity = "project without logic could not be started from editor";
-                    } else if (ProjectManager.Instance.ProjectChanged) {
-                        runBtnInteractivity = "project has unsaved changes";
-                    }
+                    } 
                     RunButton.SetDescription(RUN_TEMP_PACKAGE_LABEL);
                     RunButton2.SetDescription(RUN_TEMP_PACKAGE_LABEL);
                     RunButton.SetInteractivity(string.IsNullOrEmpty(runBtnInteractivity), $"{RUN_TEMP_PACKAGE_LABEL}\n({runBtnInteractivity})");
                     RunButton2.SetInteractivity(string.IsNullOrEmpty(runBtnInteractivity), $"{RUN_TEMP_PACKAGE_LABEL}\n({runBtnInteractivity})");
+                } else if (obj is ActionPoint3D) {                    
+                    RunButton.SetDescription(RUN_ACTION_POINT_LABEL);
                 } else {
-                    runBtnInteractivity = "select action to execute it or START to run project";
+                    runBtnInteractivity = "vyberte akci, akční bod nebo START";
                     RunButton.SetInteractivity(false, $"{RUN_ACTION_OR_PACKAGE_LABEL}\n({runBtnInteractivity})");
                     RunButton2.SetInteractivity(false, $"{RUN_ACTION_OR_PACKAGE_LABEL}\n({runBtnInteractivity})");
                 }
@@ -401,7 +406,7 @@ public class LeftMenuProject : LeftMenu
             }
 
             if (!SceneManager.Instance.SceneStarted) {
-                AddActionPointUsingRobotButton.SetInteractivity(false, $"{ADD_ACTION_POINT_USING_ROBOT_LABEL}\n(scene offline");
+                AddActionPointUsingRobotButton.SetInteractivity(false, $"{ADD_ACTION_POINT_USING_ROBOT_LABEL}\n(offline");
             } else {
                 AddActionPointUsingRobotButton.SetInteractivity(true);
             }
@@ -415,7 +420,7 @@ public class LeftMenuProject : LeftMenu
 
         AddActionButton.GetComponent<Image>().enabled = false;
         AddActionButton2.GetComponent<Image>().enabled = false;
-        ActionPointAimingMenuButton.GetComponent<Image>().enabled = false;
+        //ActionPointAimingMenuButton.GetComponent<Image>().enabled = false;
         if (ActionPickerMenu.Instance.IsVisible())
             ActionPickerMenu.Instance.Hide(unlock);
         if (ActionParametersMenu.Instance.IsVisible())
@@ -431,7 +436,7 @@ public class LeftMenuProject : LeftMenu
     
 
     public void SaveProject() {
-        SaveButton.SetInteractivity(false, "Saving project...");
+        SaveButton.SetInteractivity(false, "Ukládám projekt...");
         Base.GameManager.Instance.SaveProject();        
     }
 
@@ -448,7 +453,7 @@ public class LeftMenuProject : LeftMenu
 
 
     public async void RunProject() {
-        GameManager.Instance.ShowLoadingScreen("Running project", true);
+        GameManager.Instance.ShowLoadingScreen("Spouštím program...", true);
         try {
             await Base.WebsocketManager.Instance.TemporaryPackage();
             MainMenu.Instance.Close();
@@ -536,13 +541,13 @@ public class LeftMenuProject : LeftMenu
         }
     }*/
 
-    public override void CopyObjectClick() {
+    public override async void CopyObjectClick() {
         InteractiveObject selectedObject = SelectorMenu.Instance.GetSelectedObject();
         if (selectedObject is null)
             return;
         if (selectedObject.GetType() == typeof(ActionPoint3D)) {
-            selectAPNameWhenCreated = selectedObject.GetName() + "_copy";
-            WebsocketManager.Instance.CopyActionPoint(selectedObject.GetId(), null, selectedObject.GetName(), CopyActionPointCallback);            
+            selectAPNameWhenCreated = selectedObject.GetName() + "_copy";            
+            WebsocketManager.Instance.CopyActionPoint(selectedObject.GetId(), Sight.Instance.CreatePoseInTheView().Position, selectedObject.GetName(), CopyActionPointCallback);            
         } else if (selectedObject is Base.Action action) {
             ActionPickerMenu.Instance.DuplicateAction(action);
         }
@@ -550,6 +555,7 @@ public class LeftMenuProject : LeftMenu
 
     private void CopyActionPointCallback(string actionPointName, string data) {
         CopyActionPointResponse response = JsonConvert.DeserializeObject<CopyActionPointResponse>(data);
+        Base.ActionPoint ap = ProjectManager.Instance.GetactionpointByName(actionPointName);
         if (response.Result) {
             Notifications.Instance.ShowToastMessage($"Action point {actionPointName} was duplicated");
         } else {
@@ -652,7 +658,7 @@ public class LeftMenuProject : LeftMenu
             Notifications.Instance.ShowNotification("Failed to add action point", response.Messages.FirstOrDefault());
         }
     }
-
+    /*
     public async void ActionPointAimingClick() {
         if (!SelectorMenu.Instance.gameObject.activeSelf && !ActionPointAimingMenuButton.GetComponent<Image>().enabled) { //other menu/dialog opened
             SetActiveSubmenu(CurrentSubmenuOpened, unlock: false); //close all other opened menus/dialogs and takes care of red background of buttons
@@ -679,7 +685,7 @@ public class LeftMenuProject : LeftMenu
             
 
         }
-    }
+    }*/
 
 
     public override void UpdateVisibility() {
@@ -790,6 +796,16 @@ public class LeftMenuProject : LeftMenu
         }
     }
 
+    public void AddNewObject() {
+        MeshPicker.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 0.2f;
+        MeshPicker.GetComponent<FaceCamera>().Update();
+        SelectorMenu.Instance.gameObject.SetActive(false);
+        RightButtonsMenu.Instance.gameObject.SetActive(true);
+        RightButtonsMenu.Instance.SetMenuTriggerMode();
+        SelectorMenu.Instance.Active = false;
+        MeshPicker.SetActive(true);
+    }
+
     public void ActionMoveToClick(ActionPoint3D actionPoint) {
         string robotId = "";
         foreach (IRobot r in SceneManager.Instance.GetRobots()) {
@@ -898,5 +914,28 @@ public class LeftMenuProject : LeftMenu
         }*/
         APToRemoveOnCancel = null;
 
+    }
+
+    public void CloseMeshPicker() {
+        SelectorMenu.Instance.gameObject.SetActive(true);
+        RightButtonsMenu.Instance.gameObject.SetActive(false);
+        SelectorMenuClick();
+        MeshPicker.SetActive(false);
+        SelectorMenu.Instance.Active = true;
+    }
+
+    public void AddCubeCb() {
+        ActionObjectPickerMenu.Instance.CreateCube();
+        CloseMeshPicker();
+    }
+    public async void AddBlueBoxCb() {
+        string name = SceneManager.Instance.GetFreeAOName("ModraKrabice");
+        await WebsocketManager.Instance.AddObjectToScene(name, "BlueBox", Sight.Instance.CreatePoseInTheView(), new List<IO.Swagger.Model.Parameter>());
+        CloseMeshPicker();
+    }
+    public async void AddTesterCb() {
+        string name = SceneManager.Instance.GetFreeAOName("Tester");
+        await WebsocketManager.Instance.AddObjectToScene(name, "Tester", Sight.Instance.CreatePoseInTheView(), new List<IO.Swagger.Model.Parameter>());
+        CloseMeshPicker();
     }
 }

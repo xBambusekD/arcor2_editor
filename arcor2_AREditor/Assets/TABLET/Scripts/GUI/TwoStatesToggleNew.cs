@@ -25,19 +25,29 @@ public class TwoStatesToggleNew : MonoBehaviour
     public GameObject DisabledImage;
 
     public void SwitchToLeft() {
+        SwitchToLeft(true);
+    }
+
+    public void SwitchToRight(bool invoke) {
+        if (CurrentState == States.Right)
+            return;
+        CurrentState = States.Right;
+        if (invoke)
+            OnRight?.Invoke();
+        Animator.Play("SwitchToRight");
+    }
+
+    public void SwitchToLeft(bool invoke) {
         if (CurrentState == States.Left)
             return;
         CurrentState = States.Left;
-        OnLeft?.Invoke();
+        if (invoke)
+            OnLeft?.Invoke();
         Animator.Play("SwitchToLeft");
     }
 
     public void SwitchToRight() {
-        if (CurrentState == States.Right)
-            return;
-        CurrentState = States.Right;
-        OnRight?.Invoke();
-        Animator.Play("SwitchToRight");
+        SwitchToRight(true);
     }
 
     public void SetInteractivity(bool interactable) {

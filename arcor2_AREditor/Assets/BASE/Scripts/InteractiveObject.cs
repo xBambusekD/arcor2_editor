@@ -141,7 +141,7 @@ public abstract class InteractiveObject : Clickable {
             lockedTree = lockTree;
             return true;
         } catch (RequestFailedException ex) {
-            Notifications.Instance.ShowNotification("Failed to lock " + GetName(), ex.Message);
+            //Notifications.Instance.ShowNotification("Failed to lock " + GetName(), ex.Message);
             return false;
         }
     }
@@ -161,7 +161,7 @@ public abstract class InteractiveObject : Clickable {
             IsLocked = false;
             return true;
         } catch (RequestFailedException ex) {
-            Debug.LogError(ex.Message);
+           //Debug.LogError(ex.Message);
             return false;
         }
     }
