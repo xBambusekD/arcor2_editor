@@ -272,9 +272,6 @@ public class ActionPoint3D : Base.ActionPoint {
     /// </summary>
     /// <param name="quaternion"></param>
     public Quaternion GetRotation() {
-        Debug.LogError(GetName());
-        Debug.LogError(GetId());
-        Debug.LogError(PlayerPrefsHelper.LoadQuaternion(GetId(), Quaternion.identity));
         return PlayerPrefsHelper.LoadQuaternion(GetId(), Quaternion.identity);
     }
 }

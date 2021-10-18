@@ -35,7 +35,7 @@ public class TransformMenu : Singleton<TransformMenu> {
     public Transform GizmoTransform;
 
     private Vector3 origScale = new Vector3();
-    public ButtonWithTooltip RotateBtn, ScaleBtn, HandBtn, UpBtn, DownBtn;
+    public ButtonWithTooltip RotateBtn, ScaleBtn, HandBtn, UpBtn, DownBtn, SetPivotBtn;
 
     private int historyIndex;
 
@@ -58,6 +58,26 @@ public class TransformMenu : Singleton<TransformMenu> {
         SceneManager.Instance.OnSceneStateEvent += OnSceneStateEvent;
         TransformWheel.List.MovementDone += TransformWheelMovementDone;
         TransformWheel.List.MovementStart += TransformWheelMovementStart;
+    }
+
+    private void Start() {
+        SelectorMenu.Instance.OnObjectSelectedChangedEvent += OnObjectSelectedChangedEvent;
+        WebsocketManager.Instance.OnRobotMoveToPoseEvent += OnRobotMoveToPoseEvent;
+    }
+
+    private void OnRobotMoveToPoseEvent(object sender, RobotMoveToPoseEventArgs args) {
+        if (args.Event.Data.MoveEventType == IO.Swagger.Model.RobotMoveToPoseData.MoveEventTypeEnum.End ||
+            args.Event.Data.MoveEventType == IO.Swagger.Model.RobotMoveToPoseData.MoveEventTypeEnum.Failed) {
+            UpBtn.SetInteractivity(true);
+            DownBtn.SetInteractivity(true);
+        }
+    }
+
+    private void OnObjectSelectedChangedEvent(object sender, InteractiveObjectEventArgs args) {
+        if (args.InteractiveObject == null)
+            SetPivotBtn.SetInteractivity(false, "Není vybraný žádný objekt");
+        else
+            SetPivotBtn.SetInteractivity(true);
     }
 
     private void TransformWheelMovementStart(object sender, EventArgs e) {
@@ -99,11 +119,12 @@ public class TransformMenu : Singleton<TransformMenu> {
             if (SceneManager.Instance.IsRobotAndEESelected()) {
                 InteractiveObject.transform.position = SceneManager.Instance.SelectedEndEffector.transform.position;
                 //Coordinates.X.SetValueMeters(SceneManager.Instance.SelectedEndEffector.transform.position.x);
-                gizmo.SetXDelta(GizmoTransform.InverseTransformPoint(InteractiveObject.transform.position).x);
-                //Coordinates.Y.SetValueMeters(SceneManager.Instance.SelectedEndEffector.transform.position.y);
-                gizmo.SetYDelta(GizmoTransform.InverseTransformPoint(InteractiveObject.transform.position).y);
-                //Coordinates.Z.SetValueMeters(SceneManager.Instance.SelectedEndEffector.transform.position.z);
-                gizmo.SetZDelta(GizmoTransform.InverseTransformPoint(InteractiveObject.transform.position).z);
+                gizmo.SetXDelta(TransformConvertor.UnityToROS(GizmoTransform.InverseTransformPoint(InteractiveObject.transform.position)).x);
+                //Coordinates.Y.SetValueMeters(TransformConvertor.UnityToROS(GameManager.Instance.Scene.transform.InverseTransformPoint(model.transform.position)).y);
+                gizmo.SetYDelta(TransformConvertor.UnityToROS(GizmoTransform.InverseTransformPoint(InteractiveObject.transform.position)).y);
+                //Coordinates.Z.SetValueMeters(TransformConvertor.UnityToROS(GameManager.Instance.Scene.transform.InverseTransformPoint(model.transform.position)).z);
+                gizmo.SetZDelta(TransformConvertor.UnityToROS(GizmoTransform.InverseTransformPoint(InteractiveObject.transform.position)).z);
+
                 //UpdateTranslate(0);
 
                 return;
@@ -344,13 +365,14 @@ public class TransformMenu : Singleton<TransformMenu> {
     }
 
     public void SwitchToTablet() {
-        TransformWheel.gameObject.SetActive(true);
+        //TransformWheel.gameObject.SetActive(true);
         //ResetPosition();
         Wheel.gameObject.SetActive(true);
         if (InteractiveObject.GetType() != typeof(ActionPoint3D))
             RotateBtn.SetInteractivity(true);
         RobotTabletBtn.SwitchToRight(false);
         StepButtons.SetActive(false);
+        SubmitPosition();
     }
 
     public void SwitchToRobot() {
@@ -363,7 +385,7 @@ public class TransformMenu : Singleton<TransformMenu> {
             RobotTabletBtn.SwitchToRight();
             return;
         }
-        TransformWheel.gameObject.SetActive(false);
+        Wheel.gameObject.SetActive(false);
         StepButtons.gameObject.SetActive(true);
         //ResetPosition();
         if (CurrentState == State.Rotate) {
@@ -371,7 +393,7 @@ public class TransformMenu : Singleton<TransformMenu> {
         }
         RotateBtn.SetInteractivity(false, "Unable to rotate with robot");
         InteractiveObject.transform.position = SceneManager.Instance.SelectedEndEffector.transform.position;
-        SaveHistory();
+        SubmitPosition();
     }
 
     public void HoldPressed() {
@@ -407,6 +429,7 @@ public class TransformMenu : Singleton<TransformMenu> {
         InteractiveObject = interactiveObject;
         if (! await interactiveObject.WriteLock(true))
             return false;
+        
         if (interactiveObject is CollisionObject co) {
             if (!await co.WriteLockObjectType()) {
                 Notifications.Instance.ShowNotification("Failed to lock the object", "");
@@ -419,6 +442,7 @@ public class TransformMenu : Singleton<TransformMenu> {
         history.Clear();
 
         await SceneManager.Instance.SelectRobotAndEE();
+        await SceneManager.Instance.SelectedRobot.WriteLock(false);
         historyIndex = -1;
         GizmoTransform.transform.position = interactiveObject.transform.position;
         GizmoTransform.transform.rotation = interactiveObject.transform.rotation;
@@ -546,6 +570,7 @@ action.EnableOffscreenIndicator(false);
         Sight.Instance.SelectedGizmoAxis -= OnSelectedGizmoAxis;
         if (unlock) {
             await InteractiveObject.WriteUnlock();
+            await SceneManager.Instance.SelectedRobot.WriteUnlock();
             if (InteractiveObject is CollisionObject co) {
                 await co.WriteUnlockObjectType();
             }
@@ -756,10 +781,7 @@ action.EnableOffscreenIndicator(false);
 
         } catch (RequestFailedException) {
             Notifications.Instance.ShowNotification("Nepovedlo se pohnout s robotem", "");
-        } finally {
-            UpBtn.SetInteractivity(true);
-            DownBtn.SetInteractivity(true);
-        }
+        } 
     }
 
     public async void RobotStepDown() {
@@ -770,10 +792,19 @@ action.EnableOffscreenIndicator(false);
 
         } catch (RequestFailedException) {
             Notifications.Instance.ShowNotification("Nepovedlo se pohnout s robotem", "");
-        } finally {
-            UpBtn.SetInteractivity(true);
-            DownBtn.SetInteractivity(true);
+        } 
+    }
+
+    public void SetPivot() {
+        
+        InteractiveObject interactiveObject = SelectorMenu.Instance.GetSelectedObject();
+        if (interactiveObject is Action3D action)
+            interactiveObject = action.ActionPoint;
+        if (interactiveObject != null) {
+            InteractiveObject.transform.position = interactiveObject.transform.position;
+            SubmitPosition();
         }
+
     }
 }
 
