@@ -315,12 +315,12 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
 
         if (selectedObject.GetType() == typeof(StartAction)) {
             GameManager.Instance.SaveProject();
-            GameManager.Instance.ShowLoadingScreen("Running project", true);
+            GameManager.Instance.ShowLoadingScreen("Spouštím program", true);
             try {
                 await Base.WebsocketManager.Instance.TemporaryPackage();
                 //MenuManager.Instance.MainMenu.Close();
             } catch (RequestFailedException ex) {
-                Base.Notifications.Instance.ShowNotification("Failed to run temporary package", "");
+                Base.Notifications.Instance.ShowNotification("Nepodařilo se spustit program", "");
                 Debug.LogError(ex);
                 GameManager.Instance.HideLoadingScreen(true);
             }
@@ -328,7 +328,7 @@ public class RightButtonsMenu : Singleton<RightButtonsMenu> {
             try {
                 await WebsocketManager.Instance.ExecuteAction(selectedObject.GetId(), false);
             } catch (RequestFailedException ex) {
-                Notifications.Instance.ShowNotification("Failed to execute action", ex.Message);
+                Notifications.Instance.ShowNotification("Nepodařilo se vykonat akci", "");
                 return;
             }
         } else if (selectedObject.GetType() == typeof(ActionPoint3D)) {

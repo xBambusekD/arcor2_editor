@@ -1003,13 +1003,13 @@ namespace Base {
         /// <param name="data"></param>
         internal void HandleActionResult(ActionResultData data) {
             if (data.Error != null)
-                Notifications.Instance.ShowNotification("Action execution failed", data.Error);
+                Notifications.Instance.ShowNotification("Vykonání akce selhalo", "Nedosažitelné místo");
             else {
                 string res = "";
                 if (data.Results != null && data.Results.Count > 0) {
                     res = "Result: " + data.Results[0];
                 }
-                Notifications.Instance.ShowNotification("Action execution finished sucessfully", res);
+                //Notifications.Instance.ShowNotification("Action execution finished sucessfully", res);
             }
             ExecutingAction = null;
             OnActionExecutionFinished?.Invoke(this, EventArgs.Empty);
