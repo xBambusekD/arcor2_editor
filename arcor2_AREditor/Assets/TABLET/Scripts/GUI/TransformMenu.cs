@@ -364,15 +364,20 @@ public class TransformMenu : Singleton<TransformMenu> {
         CurrentState = State.Scale;
     }
 
-    public void SwitchToTablet() {
-        //TransformWheel.gameObject.SetActive(true);
-        //ResetPosition();
+    public void SwitchToTablet(bool saveHistory) {
         Wheel.gameObject.SetActive(true);
         if (InteractiveObject.GetType() != typeof(ActionPoint3D))
             RotateBtn.SetInteractivity(true);
         RobotTabletBtn.SwitchToRight(false);
         StepButtons.SetActive(false);
-        SubmitPosition();
+        if (saveHistory)
+            SubmitPosition();
+    }
+
+    public void SwitchToTablet() {
+        //TransformWheel.gameObject.SetActive(true);
+        //ResetPosition();
+        SwitchToTablet(true);
     }
 
     public void SwitchToRobot() {
@@ -612,15 +617,15 @@ action.EnableOffscreenIndicator(false);
         }
     }
 
-    public void Undo() {
+    public async void Undo() {
         if (history.Count == 0 || historyIndex == 0)
             return;
 
-        SwitchToTablet();
+        SwitchToTablet(false);
         if (historyIndex < 0) {
             if (IsPositionChanged) {
                 TransformWheel.List.Stop();
-                SubmitPosition(true);
+                await SubmitPosition(true);
             }
             historyIndex = history.Count - 1;
         }
@@ -628,7 +633,7 @@ action.EnableOffscreenIndicator(false);
         historyIndex--;
         SetModelToHistoryPosition(historyIndex);
 
-        SubmitPosition(false);
+        await SubmitPosition(false);
         RedoBtn.SetInteractivity(true);
     }
 
@@ -646,7 +651,7 @@ action.EnableOffscreenIndicator(false);
 
     public void Redo() {
 
-        SwitchToTablet();
+        SwitchToTablet(false);
         Debug.Assert(historyIndex >= 0 && historyIndex < history.Count - 1);
         historyIndex++;
         RedoBtn.SetInteractivity(historyIndex < history.Count - 1);
