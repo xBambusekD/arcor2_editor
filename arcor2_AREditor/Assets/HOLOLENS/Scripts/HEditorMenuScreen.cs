@@ -3,25 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.MixedReality.Toolkit.UI;
 using System;
-public class HEditorMenuScreen : MonoBehaviour
+using Base;
+using IO.Swagger.Model;
+using Newtonsoft.Json;
+using System.Linq;
+
+
+
+public class HEditorMenuScreen : Singleton<HEditorMenuScreen>
 {
 
-    public GameObject editorSceneMenu;
+    public Interactable closeSceneButton;
 
-    public PressableButtonHoloLens2 recalibrateButton;
-    public PressableButtonHoloLens2 closeSceneButton;
+    public Interactable notificationButton;
+    public Interactable switchSceneState;
 
-    public PressableButtonHoloLens2 notificationButton;
     // Start is called before the first frame update
     void Start()
     {
-        HideEditorSceneMenu();
+       // HideEditorSceneMenu();
 
-        GameManagerH.Instance.OnOpenSceneEditor += OnOpenEditorSceneMenu;
-        GameManagerH.Instance.OnOpenProjectEditor += OnOpenEditorSceneMenu;
+       // GameManagerH.Instance.OnOpenSceneEditor += OnOpenEditorSceneMenu;
+       // GameManagerH.Instance.OnOpenProjectEditor += OnOpenEditorSceneMenu;
     
-        closeSceneButton.ButtonPressed.AddListener(() => CloseScene());
-        notificationButton.ButtonPressed.AddListener(() => HNotificationManager.Instance.ShowNotificationScreen());
+     //   closeSceneButton.OnClick.AddListener(() => CloseScene());
+        notificationButton.OnClick.AddListener(() => HNotificationManager.Instance.ShowNotificationScreen());
+        switchSceneState.OnClick.AddListener(() => SwitchSceneState());
+        SceneManagerH.Instance.OnSceneStateEvent += OnSceneStateEvent;
+
 
   //  #if !UNITY_EDITOR
       //  recalibrateButton.ButtonPressed.AddListener(() => QRTracking.QRCodesManager.Instance.StartQRTracking());
@@ -31,12 +40,43 @@ public class HEditorMenuScreen : MonoBehaviour
 
     }
 
-    private void OnOpenEditorSceneMenu(object sender, EventArgs args) {
-        ShowEditorSceneMenu();
+     public async void SaveScene() {
+       // SaveButton.SetInteractivity(false, "Saving scene...");
+        IO.Swagger.Model.SaveSceneResponse saveSceneResponse = await GameManagerH.Instance.SaveScene();
+        if (!saveSceneResponse.Result) {
+            saveSceneResponse.Messages.ForEach(Debug.LogError);
+            HNotificationManager.Instance.ShowNotification("Scene save failed: " + ( saveSceneResponse.Messages.Count > 0 ? saveSceneResponse.Messages[0] : "Failed to save scene"));
+            return;
+        } else {
+             HNotificationManager.Instance.ShowNotification("There are no unsaved changes");
+        }
+    }
+
+    public async void SaveProject(){
+
+
+          IO.Swagger.Model.SaveProjectResponse saveProjectResponse = await WebSocketManagerH.Instance.SaveProject();
+            if (saveProjectResponse != null && !saveProjectResponse.Result) {
+           
+                saveProjectResponse.Messages.ForEach(Debug.LogError);
+                HNotificationManager.Instance.ShowNotification("Failed to save project " + (saveProjectResponse.Messages.Count > 0 ? saveProjectResponse.Messages[0] : ""));
+                return;
+            }
     }
 
 
     public async void CloseScene() {
+
+        if(GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.SceneEditor){
+               SaveScene();
+        }
+         else if (GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.ProjectEditor){
+             SaveProject();
+        }
+
+     
+        //  
+
         if (SceneManagerH.Instance.SceneStarted)
             WebSocketManagerH.Instance.StopScene(false, null);
 
@@ -48,22 +88,43 @@ public class HEditorMenuScreen : MonoBehaviour
         else if (GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.ProjectEditor){
             (success, message) = await GameManagerH.Instance.CloseProject(true);
         }
-      //  (bool success, string message) = await GameManagerH.Instance.CloseScene(true);
-        if (success) {
-            editorSceneMenu.SetActive(false);
-     //   #if !UNITY_EDITOR
-       //     QRTracking.QRCodesManager.Instance.StopQRTracking();
-    //    #endif
-            HMainMenuManager.Instance.ShowMainMenuScreen();
+
+    }
+
+    private void OnSceneStateEvent(object sender, SceneStateEventArgs args) {
+        Debug.Log("SCE STATE CHANGED");
+        if (args.Event.State == IO.Swagger.Model.SceneStateData.StateEnum.Started) {
+            switchSceneState.IsToggled = true;
+        } 
+        else {
+            switchSceneState.IsToggled = false;
         }
     }
 
-    public void ShowEditorSceneMenu(){
-        editorSceneMenu.SetActive(true);
+
+        public void SwitchSceneState() {
+        if (SceneManagerH.Instance.SceneStarted)
+            StopScene();
+        else
+            StartScene();
     }
 
-    public void HideEditorSceneMenu(){
-        editorSceneMenu.SetActive(false);
+    public async void StartScene() {
+        try {
+            await WebSocketManagerH.Instance.StartScene(false);
+        } catch (RequestFailedException e) {
+           HNotificationManager.Instance.ShowNotification("Going online failed " +  e.Message);
+        }
+    }
+
+    private void StopSceneCallback(string _, string data) {
+        CloseProjectResponse response = JsonConvert.DeserializeObject<CloseProjectResponse>(data);
+        if (!response.Result)
+            HNotificationManager.Instance.ShowNotification("Going offline failed " +  response.Messages.FirstOrDefault());
+    }
+
+    public void StopScene() {
+        WebSocketManagerH.Instance.StopScene(false, StopSceneCallback);
     }
 
     // Update is called once per frame

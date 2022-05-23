@@ -680,7 +680,7 @@ public abstract class HActionPoint : HInteractiveObject, IActionPointParentH
                 return new RequestResult(false, "Action point is locked");
             else {
                 try {
-                    await WebsocketManager.Instance.UpdateActionPointPosition(GetId(), new Position(), true);
+                    await WebSocketManagerH.Instance.UpdateActionPointPosition(GetId(), new Position(), true);
                     return new RequestResult(true);
                 } catch (RequestFailedException e) {
                     return new RequestResult(false, e.Message);

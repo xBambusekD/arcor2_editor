@@ -152,7 +152,7 @@ public abstract class HAction : HInteractiveObject
             base.DestroyObject();
         }
 
-      /*  public async void AddConnection() {
+        public async void AddConnection() {
             if (!Output.AnyConnection()) {
                 if (GetId() != "START" && Metadata.Returns.Count > 0 && Metadata.Returns[0] == "boolean") {
                     ShowOutputTypeDialog(async () => await CreateNewConnection());
@@ -169,8 +169,8 @@ public abstract class HAction : HInteractiveObject
                 int howManyConditions = 0;
 
                 // kterej connection chci, případně chci vytvořit novej
-                Dictionary<string, LogicItem> items = new Dictionary<string, LogicItem>();
-                foreach (LogicItem logicItem in Output.GetLogicItems()) {
+                Dictionary<string, HLogicItem> items = new Dictionary<string, HLogicItem>();
+                foreach (HLogicItem logicItem in Output.GetLogicItems()) {
                     HAction start = HProjectManager.Instance.GetAction(logicItem.Data.Start);
                     HAction end = HProjectManager.Instance.GetAction(logicItem.Data.End);
                     string label = start.Data.Name + " -> " + end.Data.Name;
@@ -190,41 +190,41 @@ public abstract class HAction : HInteractiveObject
                     return;
                 }
                 
-                AREditorResources.Instance.ConnectionSelectorDialog.Open(items, showNewConnectionButton, this, () => WriteUnlock());
+           //     AREditorResources.Instance.ConnectionSelectorDialog.Open(items, showNewConnectionButton, this, () => WriteUnlock());
             }
-        }*/
+        }
 
-      /*  private void ShowOutputTypeDialog(UnityAction callback) {
+        private void ShowOutputTypeDialog(UnityAction callback) {
             if (Output.ConnectionCount() == 2) {
          //       Notifications.Instance.ShowNotification("Failed", "Cannot create any other connection.");
                 return;
             } else if (Output.ConnectionCount() == 1) {
-                List<LogicItem> items = Output.GetLogicItems();
+                List<HLogicItem> items = Output.GetLogicItems();
                 Debug.Assert(items.Count == 1, "There must be exactly one valid logic item!");
-                LogicItem item = items[0];
-                if (item.Data.Condition is null) {
+                HLogicItem item = items[0];
+              /*  if (item.Data.Condition is null) {
                   //  Notifications.Instance.ShowNotification("Failed", "There is already connection which serves all results");
                     return;
                 } else {
                     bool condition = JsonConvert.DeserializeObject<bool>(item.Data.Condition.Value);
                     AREditorResources.Instance.OutputTypeDialog.Open(Output, callback, false, !condition, condition);
                     return;
-                }
+                }*/
             }
-            AREditorResources.Instance.OutputTypeDialog.Open(Output, callback, true, true, true);
-        }*/
+          //  AREditorResources.Instance.OutputTypeDialog.Open(Output, callback, true, true, true);
+        }
 
         private async Task CreateNewConnection() {
             HConnectionManagerArcoro.Instance.CreateConnectionToPointer(Output.gameObject);
             
-            await GameManagerH.Instance.RequestObject(GameManagerH.EditorStateEnum.SelectingAction, GetOtherAction,
-                "Select input of other action", ValidateInput, async () => await WriteUnlock());
+           // await GameManagerH.Instance.RequestObject(GameManagerH.EditorStateEnum.SelectingAction, GetOtherAction,
+         //       "Select input of other action", ValidateInput, async () => await WriteUnlock());
         }
 
-       protected async virtual void GetOtherAction(object otherAction) {
-            HAction input = (HAction) otherAction;
+       public async virtual void GetOtherAction(HAction input) {
 
-            if (otherAction == null || input == null) {
+        if (await HConnectionManagerArcoro.Instance.ValidateConnection(Output, input.Input, GetProjectLogicIf())) {
+            if (input == null) {
                 HConnectionManagerArcoro.Instance.DestroyConnectionToMouse();
                 return;
             }
@@ -236,23 +236,11 @@ public abstract class HAction : HInteractiveObject
                 Debug.LogError(ex);
                 HNotificationManager.Instance.ShowNotification("Failed to add connection");
             }
+        }
 
         }
 
-       private async Task<RequestResult> ValidateInput(object selectedInput) {
-            if (selectedInput is HAction action) {
-                RequestResult result = new RequestResult(true, "");
-                if (!await HConnectionManagerArcoro.Instance.ValidateConnection(Output, action.Input, GetProjectLogicIf())) {
-                    result.Success = false;
-                    result.Message = "Invalid connection";
-                }
-                return result;
-            } else {
-                return new RequestResult(false, "Wrong object type selected");
-            }
-            
-        }
-
+    
         private IO.Swagger.Model.ProjectLogicIf GetProjectLogicIf() {
             if (Output.ifValue is null)
                 return null;
@@ -262,8 +250,8 @@ public abstract class HAction : HInteractiveObject
             return projectLogicIf;
         }
 
-     /*   public async Task SelectedConnection(LogicItem logicItem) {
-            AREditorResources.Instance.ConnectionSelectorDialog.Close();
+        public async Task SelectedConnection(HLogicItem logicItem) {
+        //    AREditorResources.Instance.ConnectionSelectorDialog.Close();
             if (logicItem == null) {
                 if (Metadata.Returns.Count > 0 && Metadata.Returns[0] == "boolean") {
                     ShowOutputTypeDialog(async () => await CreateNewConnection());
@@ -292,22 +280,22 @@ public abstract class HAction : HInteractiveObject
                     
                 }
             }
-        }*/
+        }
 
-     /*   public void UpdateRotation() {
+        public void UpdateRotation() {
             if (Output.AnyConnection()) {
-                LogicItem c = Output.GetLogicItems()[0];
+                HLogicItem c = Output.GetLogicItems()[0];
                 UpdateRotation(c.Input.Action);
             } else {
                 UpdateRotation(null);
-            }*/
+            }
             /*
             if (Input.AnyConnection()) {
                 LogicItem c = Input.GetLogicItems()[0];
                 c.Output.Action.UpdateRotation(this);
             }*/
                 
-     //   }
+        }
 
         public void UpdateRotation(HAction otherAction) {
             if (otherAction != null && (otherAction.transform.position - transform.position).magnitude > 0.0001) {

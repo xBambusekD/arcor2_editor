@@ -88,7 +88,7 @@ namespace Hololens {
                 // ONDESTROY CANNOT BE USED BECAUSE OF ITS DELAYED CALL - it causes mess when directly creating project from scene
         private void OnDestroy() {
         //    base.OnDestroy();
-            SceneManager.Instance.OnSceneStateEvent -= OnSceneStateEvent;
+            SceneManagerH.Instance.OnSceneStateEvent -= OnSceneStateEvent;
         //    DeleteActionObject();
         }
 
@@ -131,7 +131,7 @@ namespace Hololens {
 
         private async void UpdatePose() {
             try {
-                await WebsocketManager.Instance.UpdateActionObjectPose(Data.Id, GetPose());
+                await WebSocketManagerH.Instance.UpdateActionObjectPose(Data.Id, GetPose());
             } catch (RequestFailedException e) {
             //    Notifications.Instance.ShowNotification("Failed to update action object pose", e.Message);
                 ResetPosition();
@@ -184,9 +184,6 @@ namespace Hololens {
 
         public async override void InitActionObject(IO.Swagger.Model.SceneObject sceneObject, Vector3 position, Quaternion orientation, ActionObjectMetadataH actionObjectMetadata, IO.Swagger.Model.CollisionModels customCollisionModels = null, bool loadResources = true) {
             base.InitActionObject(sceneObject, position, orientation, actionObjectMetadata);
-            Debug.Log(sceneObject.Type);
-            Debug.Log(ActionsManagerH.Instance.RobotsMeta.Count);
-           
             // if there should be an urdf robot model
             if (ActionsManagerH.Instance.RobotsMeta.TryGetValue(sceneObject.Type, out RobotMeta robotMeta)) {
                
@@ -196,7 +193,6 @@ namespace Hololens {
                     RobotModel = UrdfManagerH.Instance.GetRobotModelInstance(robotMeta.Type, robotMeta.UrdfPackageFilename);
                 
                     if (RobotModel != null) {
-                        Debug.Log(RobotModel);
                         RobotModelLoaded();
                     } else {
                         // Robot is not loaded yet, let's wait for it to be loaded
@@ -232,66 +228,72 @@ namespace Hololens {
         }
 
         private async void RobotModelLoaded() {
+            RobotModel.RobotModelGameObject.transform.localScale = new Vector3(1f,1f,1f);
             RobotModel.RobotModelGameObject.transform.parent = transform;
             RobotModel.RobotModelGameObject.transform.localPosition = Vector3.zero;
             RobotModel.RobotModelGameObject.transform.localRotation = Quaternion.identity;
            
             RobotModel.SetActiveAllVisuals(true);
             RobotPlaceholder.SetActive(false);
+
+          /*  Outline oldOutline = gameObject.GetComponent<Outline>();
+            Color colorX = oldOutline.OutlineColor;
+            float widthO = oldOutline.OutlineWidth;
+
+            Destroy(gameObject.GetComponent<Outline>());*/
+
             Destroy(RobotPlaceholder);
+
 
             robotColliders.Clear();
             robotRenderers.Clear();
             robotRenderers.AddRange(RobotModel.RobotModelGameObject.GetComponentsInChildren<Renderer>(true));
             robotColliders.AddRange(RobotModel.RobotModelGameObject.GetComponentsInChildren<Collider>(true));
-            interactObject.GetComponentInChildren<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
+          //  interactObject.GetComponentInChildren<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
+            gameObject.GetComponent<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
 
-            Bounds totalBounds = new Bounds ();
-            if (robotRenderers.Count > 0) totalBounds = robotRenderers[0].bounds;
-    
-            foreach (Renderer r in robotRenderers) {
-                totalBounds.Encapsulate (r.bounds);
-            }
+             /*UrdfRobot urdfRobot = RobotModel.RobotModelGameObject.GetComponent<UrdfRobot>();
 
-            interactObject.transform.localScale = transform.InverseTransformVector(totalBounds.size);
-            interactObject.transform.position = totalBounds.center;            
-            
-            
-         //   transform.GetComponent<BoxCollider>().center =  new Vector3( 0.0f,0.0f,0.07f); //  totalBounds.center;  
-         //   transform.GetComponent<BoxCollider>().size = transform.InverseTransformVector(totalBounds.size);
-    /*        Bounds totalBounds = new Bounds ();
-                if (robotRenderers.Count > 0) totalBounds = robotRenderers[0].bounds;
-        
-                foreach (Renderer r in robotRenderers) {
-                    totalBounds.Encapsulate (r.bounds);
+             urdfRobot.g*/
+
+         //   Bounds totalBounds = new Bounds ();
+            if (robotRenderers.Count > 0) 
+            {
+                Bounds totalBounds = new Bounds ();
+
+                totalBounds = robotRenderers[0].bounds;
+
+                foreach(Renderer renderer in robotRenderers){
+                    totalBounds.Encapsulate (renderer.bounds);
                 }
-                
-                
-                transform.GetComponent<BoxCollider>().center =  new Vector3( 0.0f,0.0f,0.07f); //  totalBounds.center;  
-                transform.GetComponent<BoxCollider>().size = transform.InverseTransformVector(totalBounds.size);*/
-           /* outlineOnClick.InitRenderers(robotRenderers);
-            outlineOnClick.OutlineShaderType = OutlineOnClick.OutlineType.TwoPassShader;
-            outlineOnClick.InitMaterials();*/
-
-               
-
- /*           transform.GetComponent<BoxCollider>().enabled = true;
-            transform.GetComponent<BoundsControl>().enabled = true;
-            transform.GetComponent<ObjectManipulator>().enabled = true;
-
-            BoundsControl control = transform.GetComponent<BoundsControl>();
-    //       control.
-            var renderer = RobotModel.RobotModelGameObject.GetComponent<MeshRenderer>();
-            Bounds totalBounds = new Bounds ();
-            if (robotRenderers.Count > 0) totalBounds = robotRenderers[0].bounds;
-    
-            foreach (Renderer r in robotRenderers) {
-                totalBounds.Encapsulate (r.bounds);
+          //      totalBounds.Encapsulate (robotColliders[6].bounds);
+                interactObject.transform.localScale = transform.InverseTransformVector(totalBounds.size);
+                interactObject.transform.position = totalBounds.center;      
+                interactObject.transform.localRotation =  Quaternion.identity;
             }
-        
-        
-            transform.GetComponent<BoxCollider>().center =  new Vector3( 0.0f,0.0f,0.07f); //  totalBounds.center;  
-            transform.GetComponent<BoxCollider>().size = transform.InverseTransformVector(totalBounds.size);*/
+     //       totalBounds += robotRenderers[4].bounds;
+        //    totalBounds.
+         /*   if (robotRenderers.Count > 5)*/
+     //         if (robotRenderers.Count > 0) totalBounds = robotRenderers[0].bounds;
+           
+       /*     for (i = 1; i < count; i++) { 
+                totalBounds.Encapsulate (robotColliders[i].bounds);
+            }
+*/
+            if(RobotModel.RobotModelGameObject.GetComponent<Outline>() == null){
+                 Outline outline =  RobotModel.RobotModelGameObject.AddComponent<Outline>();
+
+                outline.OutlineColor = new Color(45,76,255,255);
+                outline.OutlineWidth = 4;
+                outline.enabled = false;
+
+           
+               // Destroy(RobotModel.RobotModelGameObject.GetComponent<Outline>());
+            }
+           
+                gameObject.GetComponent<ObjectManipulator>().OnHoverEntered.AddListener((a) =>  RobotModel.RobotModelGameObject.GetComponent<Outline>().enabled = true );
+                gameObject.GetComponent<ObjectManipulator>().OnHoverExited.AddListener((a) => RobotModel.RobotModelGameObject.GetComponent<Outline>().enabled = false );
+         
         
             SetOutlineSizeBasedOnScale();
 
@@ -300,26 +302,6 @@ namespace Hololens {
 
             SetDefaultJoints();
 
-          /*  Target target = GetComponent<Target>();
-            if (target != null) {
-                target.ChangeTarget(RobotModel.RobotModelGameObject);
-            }*/
-
-       /*     if (outlineWasHighlighted) {
-                outlineOnClick.Highlight();*/
-                /*if (SelectorMenu.Instance.ManuallySelected) {
-                    DisplayOffscreenIndicator(true);
-                }*/
-       //     }
-
-            // Show or hide the robot based on global settings of displaying ActionObjects.
-            // Needs to be called additionally, because when global setting is called, robot model is not loaded and only its placeholder is active.
-            /*if (robotVisible) {
-                Show();
-            } else {
-                Hide();
-            }
-            */
             if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning || GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.LoadingPackage)
                 await WebSocketManagerH.Instance.RegisterForRobotEvent(GetId(), true, RegisterForRobotEventRequestArgs.WhatEnum.Joints);
         }
@@ -375,7 +357,7 @@ namespace Hololens {
         }
 
         public override void SetVisibility(float value, bool forceShaderChange = false) {
-            base.SetVisibility(value);
+         /*   base.SetVisibility(value);
 
             if (standardShader == null) {
                 standardShader = Shader.Find("Standard");
@@ -452,7 +434,7 @@ namespace Hololens {
                     color.a = value;
                     mat.color = color;
                 }
-            }
+            }*/
         }
 
           public override void OnClick() {
@@ -524,7 +506,7 @@ namespace Hololens {
         }
 
         public async Task<bool> LoadEndEffectorsAndArms() {
-            if (!SceneManager.Instance.Valid) {
+            if (!SceneManagerH.Instance.Valid) {
                 Debug.LogError("SceneManager instance not valid");
                 return false;
             }
@@ -539,7 +521,6 @@ namespace Hololens {
             } else {
                 loadingEndEffectors = true;
             }
-            GameManagerH.Instance.ShowLoadingScreen("Loading end effectors of robot " + Data.Name);
             try {
                 Dictionary<string, List<string>> endEffectors = new Dictionary<string, List<string>>();
                 
@@ -599,60 +580,9 @@ namespace Hololens {
                 totalBounds.Encapsulate (r.bounds);
             }
 
-          /*  Debug.Log(transform.InverseTransformVector(totalBounds.center));
-            Debug.Log(totalBounds.center);*/
-
-          //  interactObject.transform.localPosition = transform.InverseTransformVector(totalBounds.center);
             interactObject.transform.localScale = transform.InverseTransformVector(totalBounds.size);
-         //   interactObject.transform.
-
-      /*  if (GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.ProjectEditor){
-                 transform.GetComponent<BoxCollider>().enabled = false;
-                 transform.GetComponent<BoundsControl>().enabled = false;
-                 transform.GetComponent<ObjectManipulator>().enabled = false;
-
-
-            } 
-            else if (GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.SceneEditor){
-                transform.GetComponent<BoxCollider>().enabled = true;
-                transform.GetComponent<BoundsControl>().enabled = true;
-                transform.GetComponent<ObjectManipulator>().enabled = true;
-
-                BoundsControl control = transform.GetComponent<BoundsControl>();
-                ObjectManipulator objectManipulator = transform.GetComponent<ObjectManipulator>();
-                objectManipulator.OnManipulationStarted.AddListener((call) => OnManipulationStarted());
-     //       control.
-                var renderer = RobotModel.RobotModelGameObject.GetComponent<MeshRenderer>();
-                Bounds totalBounds = new Bounds ();
-                if (robotRenderers.Count > 0) totalBounds = robotRenderers[0].bounds;
-        
-                foreach (Renderer r in robotRenderers) {
-                    totalBounds.Encapsulate (r.bounds);
-                }
-                
-                
-                transform.GetComponent<BoxCollider>().center =  new Vector3( 0.0f,0.0f,0.07f); //  totalBounds.center;  
-                transform.GetComponent<BoxCollider>().size = transform.InverseTransformVector(totalBounds.size);
-            }
-*/
-   /*         Bounds totalBounds = new Bounds ();
-                if (robotRenderers.Count > 0) totalBounds = robotRenderers[0].bounds;
-        
-                foreach (Renderer r in robotRenderers) {
-                    totalBounds.Encapsulate (r.bounds);
-                }
-                
-                
-                transform.GetComponent<BoxCollider>().center =  new Vector3( 0.0f,0.0f,0.07f); //  totalBounds.center;  
-                transform.GetComponent<BoxCollider>().size = transform.InverseTransformVector(totalBounds.size);
-            Colliders = robotColliders;*/
-       /*     outlineOnClick = gameObject.GetComponent<OutlineOnClick>();
-            outlineOnClick.InitRenderers(robotRenderers);
-            outlineOnClick.OutlineShaderType = OutlineOnClick.OutlineType.TwoPassShader;
-            Target target = GetComponent<Target>();
-            if (target != null) {
-                target.ChangeTarget(RobotPlaceholder);
-            }*/
+            interactObject.transform.position = totalBounds.center;            
+            interactObject.transform.rotation = transform.rotation;
         }
 
         public override GameObject GetModelCopy() {
@@ -896,14 +826,14 @@ namespace Hololens {
             base.OnObjectLocked(owner);
             if (IsLockedByOtherUser) {
                 ActionObjectName.text = GetLockedText();
-                LockIcon.SetActive(true);
+                LockIcon?.SetActive(true);
             }
         }
 
         public override void OnObjectUnlocked() {
             base.OnObjectUnlocked();
             ActionObjectName.text = GetName();
-            LockIcon.SetActive(false);
+            LockIcon?.SetActive(false);
         }
 
         public async Task<List<string>> GetArmsIds() {
@@ -922,7 +852,7 @@ namespace Hololens {
         public override void EnableVisual(bool enable) {
             if (RobotModel != null){
                 RobotModel.RobotModelGameObject.SetActive(enable);
-                interactObject.SetActive(enable);
+             //   interactObject.SetActive(enable);
 
             }
              //   RobotModel.RobotModelGameObject.SetActive(enable);
@@ -938,7 +868,7 @@ namespace Hololens {
 
         public override async Task<RequestResult> Movable() {
             RequestResult result = await base.Movable();
-            if (result.Success && SceneManager.Instance.SceneStarted) {
+            if (result.Success && SceneManagerH.Instance.SceneStarted) {
                 result.Success = false;
                 result.Message = "Robot could only be manipulated when scene is offline.";
             }
@@ -974,6 +904,11 @@ namespace Hololens {
        
         boundsControl.ScaleLerpTime = 1L;
         objectManipulator.ScaleLerpTime = 1L;
+
+        boundsControl.ScaleHandlesConfig.ShowScaleHandles = false;
+        boundsControl.RotationHandlesConfig.ShowHandleForX = false;
+        //boundsControl.RotationHandlesConfig.ShowHandleForY = false;
+        boundsControl.RotationHandlesConfig.ShowHandleForZ = false;
         boundsControl.UpdateBounds();
      }
 

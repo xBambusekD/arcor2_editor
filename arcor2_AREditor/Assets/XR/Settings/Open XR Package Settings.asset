@@ -144,10 +144,25 @@ MonoBehaviour:
   - {fileID: 6400657342599701110}
   - {fileID: 1461737672163972450}
   - {fileID: 5162832598645396106}
-  - {fileID: -1388477246299432371}
   - {fileID: -3244964344431590935}
+  - {fileID: -1388477246299432371}
   m_renderMode: 1
   m_depthSubmissionMode: 1
+--- !u!114 &-7116823881476906999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a1f07dc5afe854f9f12a4194aca3fb, type: 3}
+  m_Name: iPhone
+  m_EditorClassIdentifier: 
+  features: []
+  m_renderMode: 1
+  m_depthSubmissionMode: 0
 --- !u!114 &-6867772890135797525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -246,7 +261,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_enabled: 0
   nameUi: Mock Runtime
-  version: 0.0.1
+  version: 0.0.2
   featureIdInternal: com.unity.openxr.feature.mockruntime
   openxrExtensionStrings: XR_UNITY_null_gfx
   company: Unity
@@ -455,6 +470,26 @@ MonoBehaviour:
   company: Microsoft
   priority: 0
   required: 0
+--- !u!114 &-988233212793529342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef793c31862a37448e907829482ef80, type: 3}
+  m_Name: OculusQuestFeature Android
+  m_EditorClassIdentifier: 
+  m_enabled: 0
+  nameUi: Oculus Quest Support
+  version: 1.0.0
+  featureIdInternal: com.unity.openxr.feature.oculusquest
+  openxrExtensionStrings: XR_OCULUS_android_initialize_loader
+  company: Unity
+  priority: 0
+  required: 0
 --- !u!114 &-550712037739908639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -489,11 +524,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f0ebc320a151d3408ea1e9fce54d40e, type: 3}
   m_Name: Open XR Package Settings
   m_EditorClassIdentifier: 
-  Keys: 01000000070000000e000000
+  Keys: 01000000070000000e00000004000000
   Values:
   - {fileID: 8739192819126966708}
   - {fileID: 2644276012471360942}
   - {fileID: -7126053390538372861}
+  - {fileID: -7116823881476906999}
 --- !u!114 &365224302505684424
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -611,6 +647,7 @@ MonoBehaviour:
   - {fileID: 850741034933969965}
   - {fileID: 4101175523519298574}
   - {fileID: -8781730363964058039}
+  - {fileID: -988233212793529342}
   - {fileID: 6917992733469217107}
   - {fileID: 6551135512890328054}
   m_renderMode: 1
@@ -815,6 +852,7 @@ MonoBehaviour:
   m_Name: MockDriver Standalone
   m_EditorClassIdentifier: 
   m_enabled: 0
+  <failedInitialization>k__BackingField: 0
   nameUi: Mock Driver
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.mockdriver
@@ -861,7 +899,6 @@ MonoBehaviour:
   - {fileID: 365224302505684424}
   - {fileID: -6651132932287688619}
   - {fileID: 4554767722222409523}
-  - {fileID: 7226870513486137617}
   - {fileID: -5619720302669184924}
   - {fileID: 7605688722822403627}
   - {fileID: -550712037739908639}

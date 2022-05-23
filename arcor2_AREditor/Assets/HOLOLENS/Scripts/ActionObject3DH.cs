@@ -21,7 +21,7 @@ public class ActionObject3DH : ActionObjectH
     public GameObject Visual, Model;
 
     private bool transparent = false;
-
+    public GameObject interactObject;
    /* [SerializeField]
     private OutlineOnClick outlineOnClick;*/
     public GameObject CubePrefab;
@@ -31,7 +31,7 @@ public class ActionObject3DH : ActionObjectH
 
     private List<Renderer> aoRenderers = new List<Renderer>();
 
-    public GameObject CylinderPrefab, SpherePrefab;
+    public GameObject CylinderPrefab, SpherePrefab, PlanePrefab;
 
 
     protected override void Start() {
@@ -183,17 +183,62 @@ public class ActionObject3DH : ActionObjectH
         Model.layer = LayerMask.NameToLayer(layer);
     }
 
+    
+        public GameObject getInteractObject(){
+            return interactObject;
+        }
+
+     public void setInterarction(GameObject interactComponents){
+
+        BoxCollider collider = interactComponents.GetComponent<BoxCollider>();
+        collider.size = getInteractObject().transform.localScale;
+        collider.center = getInteractObject().transform.localPosition;
+
+        BoundsControl boundsControl = interactComponents.GetComponent<BoundsControl>();
+        ObjectManipulator objectManipulator = interactComponents.GetComponent<ObjectManipulator>();
+        boundsControl.BoundsOverride = collider;
+
+        if (ActionObjectMetadata.ObjectModel.Type.Equals(ObjectModel.TypeEnum.Mesh)){
+             boundsControl.ScaleLerpTime = 1L;
+            objectManipulator.ScaleLerpTime = 1L;
+
+            boundsControl.ScaleHandlesConfig.ShowScaleHandles = false;
+            boundsControl.RotationHandlesConfig.ShowHandleForX = false;
+            //boundsControl.RotationHandlesConfig.ShowHandleForY = false;
+            boundsControl.RotationHandlesConfig.ShowHandleForZ = false;
+        }
+        else {
+            boundsControl.ScaleLerpTime = 0.6f;
+            objectManipulator.ScaleLerpTime = 1f;
+
+            boundsControl.ScaleHandlesConfig.ShowScaleHandles = true;
+            boundsControl.RotationHandlesConfig.ShowHandleForX = true;
+            boundsControl.RotationHandlesConfig.ShowHandleForY = true;
+            boundsControl.RotationHandlesConfig.ShowHandleForZ = true;
+        }
+
+      
+   
+        boundsControl.UpdateBounds();
+     }
+
+
     public override void CreateModel(CollisionModels customCollisionModels = null) {
+
+
        
+
         if (ActionObjectMetadata.ObjectModel == null || ActionObjectMetadata.ObjectModel.Type == IO.Swagger.Model.ObjectModel.TypeEnum.None) {
             Model = Instantiate(CubePrefab, Visual.transform);
             Model.transform.localScale = new Vector3(0.05f, 0.01f, 0.05f);
         } else {
             switch (ActionObjectMetadata.ObjectModel.Type) {
                 case IO.Swagger.Model.ObjectModel.TypeEnum.Box:
-                    Model = Instantiate(CubePrefab, Visual.transform);
-                   
-                    if (customCollisionModels == null) {
+                  
+                         Model = Instantiate(CubePrefab, Visual.transform);
+      
+                    
+                      if (customCollisionModels == null) {
                         Model.transform.localScale = TransformConvertor.ROSToUnityScale(new Vector3((float) ActionObjectMetadata.ObjectModel.Box.SizeX, (float) ActionObjectMetadata.ObjectModel.Box.SizeY, (float) ActionObjectMetadata.ObjectModel.Box.SizeZ));
                     } else {
                         foreach (IO.Swagger.Model.Box box in customCollisionModels.Boxes) {
@@ -203,6 +248,7 @@ public class ActionObject3DH : ActionObjectH
                             }
                         }
                     }
+                   
                     break;
                 case IO.Swagger.Model.ObjectModel.TypeEnum.Cylinder:
                     Model = Instantiate(CylinderPrefab, Visual.transform);
@@ -243,6 +289,12 @@ public class ActionObject3DH : ActionObjectH
                     break;
             }
         }
+        Vector3 vec =  Model.transform.localScale;
+        interactObject.transform.localScale  =new Vector3(vec.x + 0.01f, vec.y + 0.01f, vec.z + 0.01f);
+        interactObject.transform.position = Model.transform.position;
+    //    interactObject.GetComponentInChildren<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
+      gameObject.GetComponent<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
+
         //if (IsRobot()) {
         //    Model.tag = "Robot";
         //}
@@ -256,9 +308,24 @@ public class ActionObject3DH : ActionObjectH
 
         aoRenderers.Clear();
         aoRenderers.AddRange(Model.GetComponentsInChildren<Renderer>(true));
-        BoundsControl boundsControl = transform.GetComponent<BoundsControl>();
+
+        if(!ActionObjectMetadata.ObjectModel.Type.Equals(ObjectModel.TypeEnum.Mesh)){
+            if(Model.GetComponent<Outline>() ==null){
+                  Outline outline =   Model.AddComponent<Outline>();
+
+            outline.OutlineColor = new Color(45,76,255,255);
+            outline.OutlineWidth = 4;
+            outline.enabled = false;
+
+            gameObject.GetComponent<ObjectManipulator>().OnHoverEntered.AddListener((a) => outline.enabled = true );
+            gameObject.GetComponent<ObjectManipulator>().OnHoverExited.AddListener((a) => outline.enabled = false );
+               
+            }
+           
+        }
+ /*       BoundsControl boundsControl = transform.GetComponent<BoundsControl>();
         Debug.Log(boundsControl);
-        transform.GetComponent<BoundsControl>().BoundsOverride = Model.GetComponent<BoxCollider>();
+        transform.GetComponent<BoundsControl>().BoundsOverride = Model.GetComponent<BoxCollider>();*/
 
       //  outlineOnClick.InitRenderers(aoRenderers);
     }
@@ -287,8 +354,10 @@ public class ActionObject3DH : ActionObjectH
             Destroy(Model);
         }
 
-        Model = args.RootGameObject;
+     
 
+        Model = args.RootGameObject;
+        Model.gameObject.transform.localScale = new Vector3(1f,1f,1f);
         Model.gameObject.transform.parent = Visual.transform;
         Model.gameObject.transform.localPosition = Vector3.zero;
         Model.gameObject.transform.localRotation = Quaternion.identity;
@@ -307,6 +376,21 @@ public class ActionObject3DH : ActionObjectH
      /*   outlineOnClick.InitRenderers(aoRenderers);
         outlineOnClick.InitMaterials();*/
 
+        if (aoRenderers.Count > 0) 
+        {
+            Bounds totalBounds = new Bounds ();
+
+            totalBounds = aoRenderers[0].bounds;
+
+            foreach(Renderer renderer in aoRenderers){
+                totalBounds.Encapsulate (renderer.bounds);
+            }
+        //      totalBounds.Encapsulate (robotColliders[6].bounds);
+            interactObject.transform.localScale = transform.InverseTransformVector(totalBounds.size);
+            interactObject.transform.position = totalBounds.center;      
+            interactObject.transform.localRotation =  Quaternion.identity;
+        }
+
         //transparent = false; //needs to be set before 1st call of SetVisibility after model loading
         SetVisibility(visibility, forceShaderChange:true);
 
@@ -316,9 +400,22 @@ public class ActionObject3DH : ActionObjectH
                 DisplayOffscreenIndicator(true);
             }*/
     //    }
+     if(Model.GetComponent<Outline>() == null){
+           Outline outline =   Model.AddComponent<Outline>();
 
-        MeshImporterH.Instance.OnMeshImported -= OnModelLoaded;
+            outline.OutlineColor = new Color(45,76,255,255);
+            outline.OutlineWidth = 4;
+            outline.enabled = false;
+
+            gameObject.GetComponent<ObjectManipulator>().OnHoverEntered.AddListener((a) => outline.enabled = true );
+            gameObject.GetComponent<ObjectManipulator>().OnHoverExited.AddListener((a) => outline.enabled = false );
+               
     }
+
+    MeshImporterH.Instance.OnMeshImported -= OnModelLoaded;
+  
+    }
+
 
     /// <summary>
     /// For meshes...
@@ -427,7 +524,7 @@ public class ActionObject3DH : ActionObjectH
 
     public override void OnObjectLocked(string owner) {
         base.OnObjectLocked(owner);
-        if (owner != LandingScreen.Instance.GetUsername())
+        if (owner != HLandingManager.Instance.GetUsername())
             ActionObjectName.text = GetLockedText();
     }
 
@@ -445,7 +542,9 @@ public class ActionObject3DH : ActionObjectH
     }
 
     public override void EnableVisual(bool enable) {
+      //  interactObject.GetComponent<Outline>().enabled = enable;
         Visual.SetActive(enable);
+      //  interactObject.SetActive(enable);
     }
 
     public override void UpdateModel() {
@@ -467,5 +566,8 @@ public class ActionObject3DH : ActionObjectH
         if (dimensions != null)
             Model.transform.localScale = new Vector3(dimensions.Value.x, dimensions.Value.y, dimensions.Value.z);
 
+        Vector3 vec =  Model.transform.localScale;
+        interactObject.transform.localScale  =new Vector3(vec.x + 0.01f, vec.y + 0.01f, vec.z + 0.01f);
+        interactObject.transform.position = Model.transform.position;
     }
 }

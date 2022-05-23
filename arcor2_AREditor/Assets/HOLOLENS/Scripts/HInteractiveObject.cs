@@ -77,6 +77,7 @@ public abstract class HInteractiveObject : MonoBehaviour
     public abstract Task<RequestResult> Removable();
 
 
+
     public abstract void Remove();
     public virtual float GetDistance(Vector3 origin) {
         float minDist = float.MaxValue;

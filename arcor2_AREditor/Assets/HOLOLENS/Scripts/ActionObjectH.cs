@@ -70,7 +70,7 @@ namespace Hololens {
                         ObjectParameters[p.Name] = new Base.Parameter(parameterMeta, p.Value);
                     } else {
                         Debug.LogError("Failed to load metadata for parameter " + p.Name);
-                   //     Notifications.Instance.ShowNotification("Critical error", "Failed to load parameter's metadata.");
+                        HNotificationManager.Instance.ShowNotification("Critical error + Failed to load parameter's metadata.");
                         return;
                     }
 
@@ -79,7 +79,7 @@ namespace Hololens {
                 }
                 
             }
-            
+            Show();
             //TODO: update all action points and actions.. ?
                 
             // update position and rotation based on received data from swagger
@@ -311,7 +311,7 @@ namespace Hololens {
             IO.Swagger.Model.RemoveFromSceneResponse response =
             await WebSocketManagerH.Instance.RemoveFromScene(GetId(), false, false);
         if (!response.Result) {
-        //    Notifications.Instance.ShowNotification("Failed to remove object " + GetName(), response.Messages[0]);
+            HNotificationManager.Instance.ShowNotification("Failed to remove object " + GetName() + " " +  response.Messages[0]);
             return;
         }
     }

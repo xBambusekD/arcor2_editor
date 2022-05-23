@@ -11,7 +11,8 @@ using System.Collections;
 using Newtonsoft.Json;
 using MiniJSON;
 using Base;
-
+using RosSharp.Urdf;
+using Hololens;
 public class GameManagerH : Singleton<GameManagerH>
 {
 
@@ -45,7 +46,7 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <summary>
     /// Api version
     /// </summary>        
-    public const string ApiVersion = "0.19.0";
+    public const string ApiVersion = "0.20.0";
 
     /// <summary>
     /// GameObject of scene
@@ -114,6 +115,7 @@ public class GameManagerH : Singleton<GameManagerH>
     /// </summary>
     private GameStateEnum gameState;
 
+    public GameObject loadingScene;
     /// <summary>
     /// Holds info about server (version, supported RPCs, supported parameters etc.)
     /// </summary>
@@ -124,6 +126,10 @@ public class GameManagerH : Singleton<GameManagerH>
     /// </summary>
     private IO.Swagger.Model.Project newProject;
 
+ /// <summary>
+        /// Invoked when game state changed. Contains new state
+        /// </summary>
+    public event AREditorEventArgs.HololensGameStateEventHandler OnGameStateChanged;
     public List<IO.Swagger.Model.ListScenesResponseData> Scenes = new List<IO.Swagger.Model.ListScenesResponseData>();
 
      /// <summary>
@@ -258,7 +264,7 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <param name="value">New game state</param>
     public void SetGameState(GameStateEnum value) {
         gameState = value;            
-      //  OnGameStateChanged?.Invoke(this, new GameStateEventArgs(gameState));            
+        OnGameStateChanged?.Invoke(this, new HololensGameStateEventArgs(gameState));            
     }
 
     /// <summary>
@@ -380,7 +386,9 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <param name="forceToHide">Sets if HideLoadingScreen needs to be run with force flag to
     /// hide loading screen. Used to avoid flickering when several actions with own loading
     /// screen management are chained.</param>
-    public void ShowLoadingScreen(string text = "Loading...", bool forceToHide = false) {
+    public void ShowLoadingScreen() {
+
+        loadingScene.SetActive(true);
       /*  Debug.Assert(LoadingScreen != null);
         // HACK to make loading screen in foreground
         // TODO - find better way
@@ -407,12 +415,12 @@ public class GameManagerH : Singleton<GameManagerH>
     /// </summary>
     /// <param name="id">Scene id</param>
     public async Task OpenScene(string id) {
-      //  ShowLoadingScreen();
+        ShowLoadingScreen();
         try {
             await WebSocketManagerH.Instance.OpenScene(id);
         } catch (RequestFailedException e) {
             HNotificationManager.Instance.ShowNotification("Open scene failed " + e);
-        //    HideLoadingScreen();
+            HideLoadingScreen();
             return;
         }    
         try {
@@ -475,6 +483,22 @@ public class GameManagerH : Singleton<GameManagerH>
         return;
     }
 
+  /*  /// <summary>
+        /// Callback called when state of currently executed package change
+        /// </summary>
+        /// <param name="state">New state:
+        /// - running - the package is runnnig
+        /// - paused - the package was paused
+        /// - stopped - the package was stopped</param>
+        public void PackageStateUpdated(IO.Swagger.Model.PackageStateData state) {
+            if (!updatingPackageState) {
+                nextPackageState = null;
+                updatingPackageState = true;
+                UpdatePackageState(state);
+            }
+            else
+                nextPackageState = state;
+        }*/
 
     
     /// <summary>
@@ -482,6 +506,8 @@ public class GameManagerH : Singleton<GameManagerH>
     /// </summary>
     /// <param name="force">Specify if hiding has to be forced. More details in ShowLoadingScreen</param>
     public void HideLoadingScreen(bool force = false) {
+
+        loadingScene.SetActive(false);
      /*   Debug.Assert(LoadingScreen != null);
         LoadingScreen.Hide(force);*/
     }
@@ -559,9 +585,10 @@ public class GameManagerH : Singleton<GameManagerH>
 
                 OnConnectedToServer?.Invoke(this, new StringEventArgs(WebSocketManagerH.Instance.APIDomainWS));
 
-                await UpdateActionObjects();
+               
                 // await UpdateServices();
                 await UpdateRobotsMeta();
+                await UpdateActionObjects();
 
                 try {
                     await Task.Run(() => ActionsManagerH.Instance.WaitUntilActionsReady(15000));
@@ -577,10 +604,10 @@ public class GameManagerH : Singleton<GameManagerH>
                 connectionStatus = ConnectionStatusEnum.Disconnected;
                // OpenDisconnectedScreen();
               //  OnDisconnectedFromServer?.Invoke(this, EventArgs.Empty);
-              //  Projects = new List<IO.Swagger.Model.ListProjectsResponseData>();
-            //    Scenes = new List<IO.Swagger.Model.ListScenesResponseData>();
+                Projects = new List<IO.Swagger.Model.ListProjectsResponseData>();
+                Scenes = new List<IO.Swagger.Model.ListScenesResponseData>();
 
-            //    ProjectManager.Instance.DestroyProject();
+                HProjectManager.Instance.DestroyProject();
                 SceneManagerH.Instance.DestroyScene();
                 Scene.SetActive(false);
                 break;
@@ -678,10 +705,10 @@ public class GameManagerH : Singleton<GameManagerH>
             Scene.SetActive(true);
         }
 #else
-   /*    GameObject qrCodePrefab = GameObject.Find("QRCode");
+      /* GameObject qrCodePrefab = GameObject.Find("QRCode");
         SceneSetParent(qrCodePrefab.transform);*/
-      //               GameManagerH.Instance.SceneSetActive(true);
-        Scene.SetActive(true);
+      //               GameManagerH.Instance.SceneSeActive(true);
+      Scene.SetActive(true);
         
 #endif
      //   AREditorResources.Instance.LeftMenuScene.DeactivateAllSubmenus();
@@ -689,7 +716,8 @@ public class GameManagerH : Singleton<GameManagerH>
          SetGameState(GameStateEnum.SceneEditor);
         OnOpenSceneEditor?.Invoke(this, EventArgs.Empty);
         SetEditorState(EditorStateEnum.Normal);
-      //  HideLoadingScreen(true);
+
+       HideLoadingScreen();
     }
 
     
@@ -709,7 +737,7 @@ public class GameManagerH : Singleton<GameManagerH>
         SetGameState(GameStateEnum.ProjectEditor);
         OnOpenProjectEditor?.Invoke(this, EventArgs.Empty);
         SetEditorState(EditorStateEnum.Normal);
-      //  HideLoadingScreen(true);
+        HideLoadingScreen();
     }
 
     /// <summary>
@@ -892,10 +920,21 @@ public class GameManagerH : Singleton<GameManagerH>
 
         Scene.SetActive(false);
         SetGameState(GameStateEnum.MainScreen);
-        HMainMenuManager.Instance.ShowMainMenuScreen();
+  //      HMainMenuManager.Instance.ShowMainMenuScreen();
       //  OnOpenMainScreen?.Invoke(this, EventArgs.Empty);
         SetEditorState(EditorStateEnum.Closed);
         HideLoadingScreen();
+    }
+
+    /// <summary>
+    /// Asks server to save scene
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IO.Swagger.Model.SaveSceneResponse> SaveScene() {
+      //  ShowLoadingScreen("Saving scene...");
+        IO.Swagger.Model.SaveSceneResponse response = await WebSocketManagerH.Instance.SaveScene();
+     //   HideLoadingScreen();
+        return response;
     }
 
 
@@ -906,28 +945,49 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <returns></returns>
     internal async Task SceneOpened(Scene scene) {
       //  SetGameState(GameStateEnum.LoadingScene);
-        if (!ActionsManagerH.Instance.ActionsReady) {
+        if (!ActionsManagerH.Instance.ActionsReady || !HActionObjectPickerMenu.Instance.Loaded) {
             newScene = scene;
             openScene = true;
             return;
         }
         try {
-            HNotificationManager.Instance.ShowNotification("TRY SCENE");
-
             if (await SceneManagerH.Instance.CreateScene(scene, true)) {   
                 OpenSceneEditor();                    
             } else {
                 Debug.LogError("Failed to initialize scene");
-             HNotificationManager.Instance.ShowNotification("Failed to initialize scene SceneOpened");
         //         HideLoadingScreen();
             }
         } catch (TimeoutException ex) {
             Debug.LogError(ex);
-             HNotificationManager.Instance.ShowNotification("Failed to initialize scene SceneOpened TimeOut");
        //     HideLoadingScreen();
         } 
         
 
+    }
+
+
+    public void EnableInteractWthActionObjects(bool isEnable){
+        RobotActionObjectH[] robots = Scene.GetComponentsInChildren<RobotActionObjectH>();
+        ActionObject3DH[] models =   Scene.GetComponentsInChildren<ActionObject3DH>();
+        foreach(RobotActionObjectH robot in robots){
+            UrdfRobot urdfRobot = robot.RobotModel.RobotModelGameObject.GetComponentInChildren<UrdfRobot>();
+            urdfRobot.SetCollidersConvex(isEnable);
+        }
+        foreach(ActionObject3DH model in models){
+             BoxCollider collider =  model.Model.GetComponent<BoxCollider>();
+             if(collider != null)
+                collider.isTrigger = !isEnable;
+        }
+
+        /*   if(InteractiveObject is RobotActionObjectH robot){
+                UrdfRobot urdfRobot = model.GetComponent<UrdfRobot>();
+                urdfRobot.SetCollidersConvex(false);
+            }
+            else if(InteractiveObject is ActionObject3DH actionObject){
+             BoxCollider collider =  model.GetComponent<BoxCollider>();
+             collider.isTrigger = true;
+            }*/
+        
     }
 
     /// <summary>
@@ -937,7 +997,7 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <returns></returns>
     internal async void ProjectOpened(Scene scene, Project project) {
         var state = GetGameState();
-        if (!ActionsManagerH.Instance.ActionsReady) {
+        if (!ActionsManagerH.Instance.ActionsReady || !HActionObjectPickerMenu.Instance.Loaded) {
             newProject = project;
             newScene = scene;
             openProject = true;
@@ -949,7 +1009,8 @@ public class GameManagerH : Singleton<GameManagerH>
         }
     //    SetGameState(GameStateEnum.LoadingProject);
         try {
-             HNotificationManager.Instance.ShowNotification("TRY SCENE");
+         
+           // ListScenes.Instance.createMenuScene(scene,project);
             if (!await SceneManagerH.Instance.CreateScene(scene, true)) {
                 HNotificationManager.Instance.ShowNotification("Failed to initialize scene Project CreateScene");
                 Debug.LogError("wft");
@@ -1092,8 +1153,13 @@ public class GameManagerH : Singleton<GameManagerH>
     }
 
     public void SceneSetParent(Transform transform){
+       /* ; //z = -1 offset for QRCube
+         //x=90 for QRCube
+        Scene.transform.localScale = new Vector3(1f, 1f, 1f);
+        Scene.transform.localEulerAngles = Vector3.zero;*/
         Scene.transform.parent = transform;
-    //    Scene.transform.Rotate(90.0f, 0.0f, 0.0f, Space.Self);
+        Scene.transform.localPosition = new Vector3(0f, 0f, 0f);
+        Scene.transform.localEulerAngles =  new Vector3(0f, 90f, 90f);
     }
 
 

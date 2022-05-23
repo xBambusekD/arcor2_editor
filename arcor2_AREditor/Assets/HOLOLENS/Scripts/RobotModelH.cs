@@ -57,11 +57,6 @@ public class RobotModelH
                 visuals.Add(visual, copyOfRobotModel ? true : (visual.GeometryType == GeometryTypes.Mesh ? false : true));
                 // hide visual if it is mesh.. mesh will be displayed when fully loaded
                 visual.gameObject.SetActive(copyOfRobotModel ? true : (visual.GeometryType == GeometryTypes.Mesh ? false : true));
-                if(visual.GeometryType == GeometryTypes.Box){
-                    Debug.Log("BOOOOOX");
-                    
-                }
-
                 // get scale of urdfVisual and each of its child
                 foreach (Transform child in visual.GetComponentsInChildren<Transform>()) {
                     scale *= child.localScale.x;

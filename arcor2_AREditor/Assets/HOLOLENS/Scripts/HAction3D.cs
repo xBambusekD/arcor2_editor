@@ -9,12 +9,17 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Hololens;
+using Base;
+using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
+using Microsoft.MixedReality.Toolkit.UI;
 
 //[RequireComponent(typeof(OutlineOnClick))]
 //[RequireComponent(typeof(Target))]
 public class HAction3D : HAction
 {
     public Renderer Visual;
+
+    public GameObject interactObject;
 
     private Color32 colorDefault = new Color32(229, 215, 68, 255);
     private Color32 colorRunnning = new Color32(255, 0, 255, 255);
@@ -31,11 +36,13 @@ public class HAction3D : HAction
 
     protected override void Start() {
         base.Start();
+        interactObject.GetComponentInChildren<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
+
       //  GameManagerH.Instance.OnStopPackage += OnProjectStop;
     }
 
     private void LateUpdate() {
-      //  UpdateRotation();
+        UpdateRotation();
     }
 
     private void OnEnable() {

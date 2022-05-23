@@ -65,6 +65,9 @@ public class MeshImporterH : Singleton<MeshImporterH>
             // Supports: FBX, OBJ, GLTF2, STL, PLY, 3MF
             AssetLoaderOptions assetLoaderOptions = AssetLoader.CreateDefaultLoaderOptions();
             AssetLoader.LoadModelFromFile(path, null, delegate (AssetLoaderContext assetLoaderContext) {
+                 if (Path.GetExtension(path).ToLower() == ".stl") {
+                    assetLoaderContext.RootGameObject.transform.Rotate(0f, 180f, 0f);
+                }
                 OnMeshImported?.Invoke(this, new ImportedMeshEventArgsH(assetLoaderContext.WrapperGameObject, aoId));
             }, null, assetLoaderOptions: assetLoaderOptions, onError: OnModelLoadError, wrapperGameObject: loadedObject);
         }
@@ -80,21 +83,22 @@ public class MeshImporterH : Singleton<MeshImporterH>
     private IEnumerator DownloadMesh(string meshId, string fileName, string aoId) {
 
         //Debug.LogError("MESH: download started");
-  //      string uri = MainSettingsMenu.Instance.GetProjectServiceURI() + fileName;
+     //   string uri = MainSettingsMenu.Instance.GetProjectServiceURI() + fileName;
 
-        string uri = PlayerPrefsHelper.LoadString("ProjectServiceURI", "");
-        string suffix = "/files/";
+               //Debug.LogError("MESH: download started");
+            string uri = PlayerPrefsHelper.LoadString("ProjectServiceURI", "");
+        string suffix =  "/files/";
         if (string.IsNullOrEmpty(uri))
             uri = "http://" + WebSocketManagerH.Instance.GetServerDomain() + ":6790" + suffix;
         else
-           uri = uri + suffix;
-        uri = uri + fileName;
+            uri = uri + suffix;
+        uri = "http://" + WebSocketManagerH.Instance.GetServerDomain() + ":6790" + suffix +fileName;
         using (UnityWebRequest www = UnityWebRequest.Get(uri)) {
             // Request and wait for the desired page.
             yield return www.Send();
             if (www.isNetworkError || www.isHttpError) {
                 Debug.LogError(www.error + " (" + uri + ")");
-            //    Notifications.Instance.ShowNotification("Failed to download mesh", www.error);
+//                Notifications.Instance.ShowNotification("Failed to download mesh", www.error);
             } else {
                 string meshDirectory = string.Format("{0}/meshes/{1}", Application.persistentDataPath, meshId);
                 Directory.CreateDirectory(meshDirectory);
@@ -123,14 +127,13 @@ public class MeshImporterH : Singleton<MeshImporterH>
                                                     ex is InvalidDataException ||
                                                     ex is UnauthorizedAccessException) {
                         Debug.LogError(ex);
-                     //   Notifications.Instance.ShowNotification("Failed to extract mesh", "");
+                       // Notifications.Instance.ShowNotification("Failed to extract mesh", "");
                     }
                 } else { //not *.zip
                     OnMeshDownloaded(meshId, savePath, aoId);
                 }
             }
         }
-
 
     }
 
@@ -202,8 +205,16 @@ public class MeshImporterH : Singleton<MeshImporterH>
             // Check whether downloading can be started and start it, if so.
             return CanIDownload(meshId);
         }
+
+        string uri = PlayerPrefsHelper.LoadString("ProjectServiceURI", "");
+        string suffix =  "/files/";
+        if (string.IsNullOrEmpty(uri))
+            uri = "http://" + WebSocketManagerH.Instance.GetServerDomain() + ":6790" + suffix;
+        else
+            uri = uri + suffix;
         
-        string uri = MainSettingsMenu.Instance.GetProjectServiceURI() + fileName;
+         uri = "http://" + WebSocketManagerH.Instance.GetServerDomain() + ":6790" + suffix +  fileName;
+      //  string uri = MainSettingsMenu.Instance.GetProjectServiceURI() + fileName;
         DateTime downloadedZipLastModified = meshFileInfo.LastWriteTime;
         try {
             HttpWebRequest httpWebRequest = (HttpWebRequest) WebRequest.Create(uri);

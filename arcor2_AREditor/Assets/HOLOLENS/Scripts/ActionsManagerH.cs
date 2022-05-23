@@ -50,8 +50,8 @@ public class ActionsManagerH :  Singleton<ActionsManagerH>
         Init();
         WebSocketManagerH.Instance.OnDisconnectEvent += OnDisconnected;
         WebSocketManagerH.Instance.OnObjectTypeAdded += ObjectTypeAdded;
-    //    WebsocketManager.Instance.OnObjectTypeRemoved += ObjectTypeRemoved;
-     //   WebsocketManager.Instance.OnObjectTypeUpdated += ObjectTypeUpdated;
+        WebSocketManagerH.Instance.OnObjectTypeRemoved += ObjectTypeRemoved;
+        WebSocketManagerH.Instance.OnObjectTypeUpdated += ObjectTypeUpdated;
     }
 
     private void OnDisconnected(object sender, EventArgs args) {
@@ -114,7 +114,7 @@ public class ActionsManagerH :  Singleton<ActionsManagerH>
             UpdateRobotsMetadata(await WebSocketManagerH.Instance.GetRobotMeta());
         }
             
- //       OnObjectTypesUpdated?.Invoke(this, new StringListEventArgs(updated));
+        OnObjectTypesUpdated?.Invoke(this, new StringListEventArgs(updated));
     }
 
 
@@ -241,6 +241,25 @@ public class ActionsManagerH :  Singleton<ActionsManagerH>
         enabled = true;
        
         ActionObjectsLoaded = true;
+    }
+
+    public void ObjectTypeRemoved(object sender, StringListEventArgs type) {
+        List<string> removed = new List<string>();
+        foreach (string item in type.Data) {
+            if (actionObjectsMetadata.ContainsKey(item)) {
+                actionObjectsMetadata.Remove(item);
+                removed.Add(item);
+            }
+        }
+        if (type.Data.Count > 0) {
+            AbstractOnlyObjects = true;
+            foreach (ActionObjectMetadataH obj in actionObjectsMetadata.Values) {
+                if (AbstractOnlyObjects && !obj.Abstract)
+                    AbstractOnlyObjects = false;
+            }
+            OnObjectTypesRemoved?.Invoke(this, new StringListEventArgs(new List<string>(removed)));
+        }
+
     }
 
 

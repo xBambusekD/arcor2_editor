@@ -5,11 +5,15 @@ using UnityEngine.UI;
 using Hololens;
 using UnityEngine;
 using Microsoft.MixedReality.Toolkit.Experimental.UI;
+using  Microsoft.MixedReality.Toolkit.UI;
+
 
 public class HLandingManager : Singleton<HLandingManager>
 {
-    public Button connectToServerBtn;
+    //public Button connectToServerBtn;
     public GameObject landingScreen;
+
+    public Interactable connectButton;
     
     public MRTKUGUIInputField  domain;
     public MRTKUGUIInputField  port;
@@ -24,7 +28,7 @@ public class HLandingManager : Singleton<HLandingManager>
         domain.text = PlayerPrefs.GetString("arserver_domain", "");
         port.text = PlayerPrefs.GetInt("arserver_port", 6789).ToString();
         user.text = PlayerPrefs.GetString("arserver_username", "user1").ToString();
-        connectToServerBtn.onClick.AddListener(() => ConnectToServer(true));
+        connectButton.OnClick.AddListener(() => ConnectToServer(true));
     }
 
     public void ConnectToServer(bool force = true) {

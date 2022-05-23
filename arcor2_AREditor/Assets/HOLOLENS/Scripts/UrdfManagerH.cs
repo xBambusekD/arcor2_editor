@@ -37,6 +37,8 @@ public class UrdfManagerH : Singleton<UrdfManagerH>
     /// <param name="robotType">Type of robot.</param>
     /// <param name="fileName">Where URDF should be stored.</param>
     /// <returns></returns>
+
+    public bool IsMenu { get; set; }
     public IEnumerator DownloadUrdfPackage(string robotType, string fileName) {
         //GameManager.Instance.SetTurboFramerate();
 

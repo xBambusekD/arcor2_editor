@@ -19,11 +19,11 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
     public GameObject mainMenuScreen;
     public GameObject scenesScreen;
     public GameObject projectsScreen;
-    public PressableButtonHoloLens2 showScenesButton;
+    public Interactable showScenesButton;
 
-    public PressableButtonHoloLens2 showProjectsButton;
+    public Interactable showProjectsButton;
 
-    public PressableButtonHoloLens2 showNotificationsButton;
+    public Interactable showNotificationsButton;
 
     public List<GameObject> SceneTiles => sceneTiles;
 
@@ -45,14 +45,14 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
     {
         mainMenuScreen.SetActive(false);
         scenesScreen.SetActive(false);
-        GameManagerH.Instance.OnOpenSceneEditor += OnShowEditorScreen;
-        GameManagerH.Instance.OnOpenProjectEditor += OnShowEditorScreen;
-        GameManagerH.Instance.OnConnectedToServer += ConnectedToServer;
-        GameManagerH.Instance.OnScenesListChanged += UpdateScenes;
-        GameManagerH.Instance.OnProjectsListChanged += UpdateProjects;
-        showScenesButton.TouchBegin.AddListener(() => OpenScenes());
-        showProjectsButton.TouchBegin.AddListener(() => OpenProjects());
-        showNotificationsButton.TouchBegin.AddListener(() => HNotificationManager.Instance.ShowNotificationScreen());
+      //  GameManagerH.Instance.OnOpenSceneEditor += OnShowEditorScreen;
+       // GameManagerH.Instance.OnOpenProjectEditor += OnShowEditorScreen;
+      //  GameManagerH.Instance.OnConnectedToServer += ConnectedToServer;
+      //  GameManagerH.Instance.OnScenesListChanged += UpdateScenes;
+       // GameManagerH.Instance.OnProjectsListChanged += UpdateProjects;
+        showScenesButton.OnClick.AddListener(() => OpenScenes());
+        showProjectsButton.OnClick.AddListener(() => OpenProjects());
+        showNotificationsButton.OnClick.AddListener(() => HNotificationManager.Instance.ShowNotificationScreen());
     }
 
     // Update is called once per frame
@@ -125,7 +125,7 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
         try {
             await WaitUntilScenesLoaded();
 
-            scenesScreen.SetActive(true);
+           // scenesScreen.SetActive(true);
 
      //       AddNewBtn.SetDescription("Add scene");
 
@@ -137,13 +137,13 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
     }
 
     public async void OpenProjects() {
-        if (!scenesUpdating) {
+      /*  if (!scenesUpdating) {
             scenesUpdating = true;
             scenesLoaded = false;
             WebSocketManagerH.Instance.LoadScenes(LoadScenesCb);
-        }
+        }*/
         try {
-            await WaitUntilScenesLoaded();
+           // await WaitUntilScenesLoaded();
             if (!projectsUpdating) {
                 projectsUpdating = true;
                 projectsLoaded = false;
@@ -151,7 +151,7 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
             }
             await WaitUntilProjectsLoaded();
         
-            projectsScreen.SetActive(true);
+          //  projectsScreen.SetActive(true);
            
         } catch (TimeoutException ex) {
             HNotificationManager.Instance.ShowNotification("Failed to switch to projects");
@@ -211,7 +211,6 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
             bool starred = PlayerPrefsHelper.LoadBool("project/" + project.Id + "/starred", false);
             if (project.Problems == null) {                
              
-
             projectOpenButton.GetComponent<Button>().onClick.AddListener(() => GameManagerH.Instance.OpenProject(project.Id));//.onClick()
             projectOpenButton.GetComponentInChildren<Text>().text = project.Name;
             projectOpenButton.transform.SetParent(projectParent.transform, false);
@@ -241,6 +240,7 @@ public class HMainMenuManager : Singleton<HMainMenuManager>
             }
         }
         foreach (IO.Swagger.Model.ListScenesResponseData scene in GameManagerH.Instance.Scenes) {
+            Debug.Log("--- Scene --- /n" + scene);
             GameObject sceneOpenButton = Instantiate(sceneOpenPrefabButton);
            
             sceneOpenButton.GetComponent<Button>().onClick.AddListener(() => GameManagerH.Instance.OpenScene(scene.Id));//.onClick()

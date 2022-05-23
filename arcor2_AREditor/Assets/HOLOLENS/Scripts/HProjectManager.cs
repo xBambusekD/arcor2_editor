@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Base;
 using Hololens;
+using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.Toolkit.Utilities;
+
+
 
 using System.Threading.Tasks;
 using System;
@@ -119,7 +123,7 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         public bool AnyAvailableAction;
 
         public event AREditorEventArgs.ActionPointEventHandler OnActionPointAddedToScene;
-        public event AREditorEventArgs.ActionEventHandler OnActionAddedToScene;
+        public event AREditorEventArgs.HololensActionEventHandler OnActionAddedToScene;
 
         public event AREditorEventArgs.ActionPointOrientationEventHandler OnActionPointOrientationAdded;
         public event AREditorEventArgs.ActionPointOrientationEventHandler OnActionPointOrientationUpdated;
@@ -128,18 +132,18 @@ public class HProjectManager : Base.Singleton<HProjectManager>
     // Start is called before the first frame update
     void Start()
     {
-           /* WebSocketManagerH.Instance.OnLogicItemAdded += OnLogicItemAdded;
+            WebSocketManagerH.Instance.OnLogicItemAdded += OnLogicItemAdded;
             WebSocketManagerH.Instance.OnLogicItemRemoved += OnLogicItemRemoved;
-            WebSocketManagerH.Instance.OnLogicItemUpdated += OnLogicItemUpdated;
+       /*     WebSocketManagerH.Instance.OnLogicItemUpdated += OnLogicItemUpdated;
             WebSocketManagerH.Instance.OnProjectBaseUpdated += OnProjectBaseUpdated;
-
+*/
             WebSocketManagerH.Instance.OnActionPointAdded += OnActionPointAdded;
             WebSocketManagerH.Instance.OnActionPointRemoved += OnActionPointRemoved;
             WebSocketManagerH.Instance.OnActionPointUpdated += OnActionPointUpdated;
             WebSocketManagerH.Instance.OnActionPointBaseUpdated += OnActionPointBaseUpdated;
 
             WebSocketManagerH.Instance.OnActionPointOrientationAdded += OnActionPointOrientationAddedCallback;
-            WebSocketManagerH.Instance.OnActionPointOrientationUpdated += OnActionPointOrientationUpdatedCallback;
+         /*   WebSocketManagerH.Instance.OnActionPointOrientationUpdated += OnActionPointOrientationUpdatedCallback;
             WebSocketManagerH.Instance.OnActionPointOrientationBaseUpdated += OnActionPointOrientationBaseUpdatedCallback;
             WebSocketManagerH.Instance.OnActionPointOrientationRemoved += OnActionPointOrientationRemovedCallback;
 
@@ -177,7 +181,6 @@ public class HProjectManager : Base.Singleton<HProjectManager>
                 AnyAvailableAction = true;
                 break;
             }
-    Debug.Log(StartPrefab);
         StartAction = Instantiate(StartPrefab,  SceneManagerH.Instance.SceneOrigin.transform).GetComponent<HStartAction>();
         StartAction.Init(null, null, null, null, "START");
         EndAction = Instantiate(EndPrefab, SceneManagerH.Instance.SceneOrigin.transform).GetComponent<HEndAction>();
@@ -374,6 +377,61 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         return true;
     }
 
+    private void OnActionPointBaseUpdated(object sender, BareActionPointEventArgs args) {
+        try {
+            HActionPoint actionPoint = GetActionPoint(args.ActionPoint.Id);
+            actionPoint.ActionPointBaseUpdate(args.ActionPoint);
+            updateProject = true;
+        } catch (KeyNotFoundException ex) {
+            Debug.Log("Action point " + args.ActionPoint.Id + " not found!");
+            HNotificationManager.Instance.ShowNotification( "Action point " + args.ActionPoint.Id + " not found!");
+            return;
+        }
+    }
+
+    private void OnActionPointRemoved(object sender, StringEventArgs args) {
+        RemoveActionPoint(args.Data);
+        updateProject = true;
+    }
+
+    private void OnActionPointUpdated(object sender, ProjectActionPointEventArgs args) {
+        try {
+            HActionPoint actionPoint = GetActionPoint(args.ActionPoint.Id);
+            actionPoint.UpdateActionPoint(args.ActionPoint);
+            updateProject = true;
+            // TODO - update orientations, joints etc.
+        } catch (KeyNotFoundException ex) {
+            Debug.LogError("Action point " + args.ActionPoint.Id + " not found!");
+            HNotificationManager.Instance.ShowNotification("Action point " + args.ActionPoint.Id + " not found!");
+            return;
+        }
+    }
+    
+
+    private async void OnActionPointAdded(object sender, ProjectActionPointEventArgs data) {
+        HActionPoint ap = null;
+        if (data.ActionPoint.Parent == null || data.ActionPoint.Parent == "") {
+            ap = SpawnActionPoint(data.ActionPoint, null);
+            await HSelectorManager.Instance.LockObject(ap, false);
+            Orientation orientation = new Orientation(1,0,180,0);
+            await WebSocketManagerH.Instance.AddActionPointOrientation(ap.Data.Id, orientation,  ap.GetFreeOrientationName());
+        } else {
+            try {
+                IActionPointParentH actionPointParent = GetActionPointParent(data.ActionPoint.Parent);
+                
+                ap = SpawnActionPoint(data.ActionPoint, actionPointParent);
+                await HSelectorManager.Instance.LockObject(ap, false);
+                Orientation orientation = new Orientation(1,0,180,0);
+                await  WebSocketManagerH.Instance.AddActionPointOrientation(ap.Data.Id, orientation,  ap.GetFreeOrientationName());
+            } catch (KeyNotFoundException ex) {
+                Debug.LogError(ex);
+            }
+
+        }
+        
+        updateProject = true;
+    }
+
 
     /// <summary>
     /// Destroys and removes references to action point of given Id.
@@ -514,7 +572,7 @@ public class HProjectManager : Base.Singleton<HProjectManager>
     /// </summary>
     /// <param name="action"></param>
     public void ActionRemoved(IO.Swagger.Model.BareAction action) {
-        ProjectManager.Instance.RemoveAction(action.Id);
+        RemoveAction(action.Id);
         updateProject = true;
     }
 
@@ -569,6 +627,58 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         }
 
 
+         /// <summary>
+        /// Updates action 
+        /// </summary>
+        /// <param name="projectAction">Action description</param>
+        public void ActionUpdated(IO.Swagger.Model.Action projectAction) {
+            HAction action = GetAction(projectAction.Id);
+            if (action == null) {
+                Debug.LogError("Trying to update non-existing action!");
+                return;
+            }
+            action.ActionUpdate(projectAction, true);
+            updateProject = true;
+        }
+
+        /// <summary>
+        /// Updates metadata of action
+        /// </summary>
+        /// <param name="projectAction">Action description</param>
+        public void ActionBaseUpdated(IO.Swagger.Model.BareAction projectAction) {
+            HAction action = GetAction(projectAction.Id);
+            if (action == null) {
+                Debug.LogError("Trying to update non-existing action!");
+                return;
+            }
+            action.ActionUpdateBaseData(projectAction);
+            updateProject = true;
+        }
+/*
+
+  */
+        /// <summary>
+        /// Adds action to the project
+        /// </summary>
+        /// <param name="projectAction">Action description</param>
+        /// <param name="parentId">UUID of action point to which the action should be added</param>
+        public void ActionAdded(IO.Swagger.Model.Action projectAction, string parentId) {
+            HActionPoint actionPoint = GetActionPoint(parentId);
+            try {
+               HAction action = SpawnAction(projectAction, actionPoint);
+                // updates name of the action
+                action.ActionUpdateBaseData(DataHelper.ActionToBareAction(projectAction));
+                // updates parameters of the action
+                action.ActionUpdate(projectAction);
+                //action.EnableInputOutput(MainSettingsMenu.Instance.ConnectionsSwitch.IsOn());
+                updateProject = true;
+                OnActionAddedToScene.Invoke(this, new HololensActionEventArgs(action));
+            } catch (RequestFailedException ex) {
+                Debug.LogError(ex);
+            }            
+        }
+
+
 
         /// <summary>
         /// Spawn action point into the project
@@ -610,5 +720,237 @@ public class HProjectManager : Base.Singleton<HProjectManager>
             ProjectMeta.Name = project.Name;
             
         }
+
+
+        /// <summary>
+        /// Returns all action points in the scene in a list [ActionPoint_object]
+        /// </summary>
+        /// <returns></returns>
+        public List<HActionPoint> GetAllActionPoints() {
+            return ActionPoints.Values.ToList();
+        }
+
+        
+        /// <summary>
+        /// Checks if action point with given name exists
+        /// </summary>
+        /// <param name="name">Human readable action point name</param>
+        /// <returns></returns>
+        public bool ActionPointsContainsName(string name) {
+            foreach (HActionPoint ap in GetAllActionPoints()) {
+                if (ap.Data.Name == name)
+                    return true;
+            }
+            return false;
+        }
+
+
+        /// <summary>
+        /// Finds free AP name, based on given name (e.g. globalAP, globalAP_1, globalAP_2 etc.)
+        /// </summary>
+        /// <param name="apDefaultName">Name of parent or "globalAP"</param>
+        /// <returns></returns>
+        public string GetFreeAPName(string apDefaultName) {
+            int i = 2;
+            bool hasFreeName;
+            string freeName = apDefaultName + "_ap";
+            do {
+                hasFreeName = true;
+                if (ActionPointsContainsName(freeName)) {
+                    hasFreeName = false;
+                }
+                if (!hasFreeName)
+                    freeName = apDefaultName + "_ap_" + i++.ToString();
+            } while (!hasFreeName);
+
+            return freeName;
+        }
+
+
+        /// <summary>
+        /// Adds action point to the project
+        /// </summary>
+        /// <param name="name">Name of new action point</param>
+        /// <param name="parent">Parent object (global AP if parent is null)</param>
+        /// <returns></returns>
+        public async Task<bool> AddActionPoint(string name, IActionPointParentH parent) {
+            try {
+                Vector3 point;
+                Vector3 position_R;
+                Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0f));
+                if(HandJointUtils.TryGetJointPose(TrackedHandJoint.IndexTip, Handedness.Any, out MixedRealityPose pose)){
+                    position_R = pose.Position;
+                }
+                else {
+                    position_R = ray.GetPoint(0.5f);
+                }
+                if (parent == null) {
+                    point = TransformConvertor.UnityToROS(GameManagerH.Instance.Scene.transform.InverseTransformPoint(position_R));
+                } else {
+                    point = TransformConvertor.UnityToROS(parent.GetTransform().InverseTransformPoint(position_R));
+                }                
+                Position position = DataHelper.Vector3ToPosition(point);
+                await WebSocketManagerH.Instance.AddActionPoint(name, parent == null ? "" : parent.GetId(), position);
+                
+                
+                return true;
+            } catch (RequestFailedException e) {
+                HNotificationManager.Instance.ShowNotification("Failed to add action point" +  e.Message);
+                return false;
+            }
+        }
+
+           public string GetFreeActionName(string actionName) {
+            int i = 2;
+            bool hasFreeName;
+            string freeName = actionName;
+            do {
+                hasFreeName = true;
+                if (ActionsContainsName(freeName)) {
+                    hasFreeName = false;
+                }
+                if (!hasFreeName)
+                    freeName = actionName + "_" + i++.ToString();
+            } while (!hasFreeName);
+
+            return freeName;
+        }
+
+        /// <summary>
+        /// Adds logic item
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnLogicItemAdded(object sender, LogicItemChangedEventArgs args) {
+            HLogicItem logicItem = new HLogicItem(args.Data);
+            LogicItems.Add(args.Data.Id, logicItem);
+        }
+
+        /// <summary>
+        /// Removes logic item
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void OnLogicItemRemoved(object sender, StringEventArgs args) {
+            if (LogicItems.TryGetValue(args.Data, out HLogicItem logicItem)) {
+                logicItem.Remove();
+                LogicItems.Remove(args.Data);
+            } else {
+                Debug.LogError("Server tries to remove logic item that does not exists (id: " + args.Data + ")");
+            }
+        }
+
+        private void OnActionPointOrientationAddedCallback(object sender, ActionPointOrientationEventArgs args) {
+            try {
+                HActionPoint actionPoint = GetActionPoint(args.ActionPointId);
+                actionPoint.AddOrientation(args.Data);
+                updateProject = true;
+                HActionPickerMenu.Instance.Show(actionPoint, true);
+
+            } catch (KeyNotFoundException ex) {
+                Debug.LogError(ex);
+                Notifications.Instance.ShowNotification("Failed to add action point orientation", ex.Message);
+                return;
+            }
+        }
+
+        
+        public IO.Swagger.Model.NamedOrientation GetAnyNamedOrientation() {
+            foreach (HActionPoint actionPoint in ActionPoints.Values) {
+                if (actionPoint.Data.Orientations.Count > 0)
+                    return actionPoint.Data.Orientations[0];
+            }
+            throw new ItemNotFoundException("No orientation available");
+        }
+
+       public IO.Swagger.Model.ProjectRobotJoints GetAnyJoints() {
+            foreach (HActionPoint actionPoint in ActionPoints.Values) {
+                if (actionPoint.Data.RobotJoints.Count > 0)
+                    return actionPoint.Data.RobotJoints[0];
+            }
+            throw new KeyNotFoundException("No joints available");
+        }
+
+
+
+    /*       /// <summary>
+        /// Disables all action points
+        /// </summary>
+        public void EnableAllActionPoints(bool enable) {
+            if (!Valid)
+                return;
+            foreach (HActionPoint ap in ActionPoints.Values) {
+                ap.Enable(enable);
+            }
+        }
+
+        /// <summary>
+        /// Disables all orientation visuals
+        /// </summary>
+        public void EnableAllOrientations(bool enable) {
+            if (!Valid)
+                return;
+            foreach (HActionPoint ap in ActionPoints.Values) {
+                foreach (HAPOrientation orietationVisual in ap.GetOrientationsVisuals()) {
+                    orietationVisual.Enable(enable);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disables all orientation visuals
+        /// </summary>
+        public async Task EnableAllRobotsEE(bool enable) {
+            foreach (HIRobot robot in SceneManagerH.Instance.GetRobots()) {
+                foreach (HRobotEE robotEE in await robot.GetAllEE()) {
+                    robotEE.Enable(enable);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Disables all actions
+        /// </summary>
+        public void EnableAllActions(bool enable) {
+            if (!Valid)
+                return;
+            foreach (HActionPoint ap in ActionPoints.Values) {
+                foreach (HAction action in ap.Actions.Values)
+                    action.Enable(enable);
+            }
+            StartAction.Enable(enable);
+            EndAction.Enable(enable);
+        }
+
+        /// <summary>
+        /// Disables all action inputs
+        /// </summary>
+        public void EnableAllActionInputs(bool enable) {
+            if (!Valid)
+                return;
+            foreach (HActionPoint ap in ActionPoints.Values) {
+                foreach (HAction action in ap.Actions.Values)
+                    ;
+                    //action.Input.Enable(enable);
+            }
+            //EndAction.Input.Enable(enable);
+        }
+
+
+        /// <summary>
+        /// Disable all action outputs
+        /// </summary>
+        public void EnableAllActionOutputs(bool enable) {
+            if (!Valid)
+                return;
+            foreach (HActionPoint ap in ActionPoints.Values) {
+                foreach (HAction action in ap.Actions.Values)
+                    ;
+                    //action.Output.Enable(enable);
+            }
+            //StartAction.Output.Enable(enable);
+        }
+*/
 
 }

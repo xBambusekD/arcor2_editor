@@ -142,6 +142,10 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     public Scene SceneMeta = null;
 
 
+    public string SelectCreatedActionObject;
+    public bool OpenTransformMenuOnCreatedObject;
+
+
     /// <summary>
     /// Public setter for sceneChanged property. Invokes OnSceneChanged event with each change and
     /// OnSceneSavedStatusChanged when sceneChanged value differs from original value (i.e. when scene
@@ -163,9 +167,12 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     // Start is called before the first frame update
     void Start()
     {
+        OnLoadScene += OnSceneLoaded;
+        WebSocketManagerH.Instance.OnRobotEefUpdated += RobotEefUpdated;
+        WebSocketManagerH.Instance.OnRobotJointsUpdated += RobotJointsUpdated;
 
         WebSocketManagerH.Instance.OnSceneStateEvent += OnSceneState;
-        //OnLoadScene += OnSceneLoaded;
+     //   
     }
 
     // Update is called once per frame
@@ -222,8 +229,8 @@ public class SceneManagerH :  Singleton<SceneManagerH>
                 SelectedArmId = null;
                 SelectedEndEffector = null;
                 OnSceneStateEvent?.Invoke(this, args); // needs to be rethrown to ensure all subscribers has updated data
-            /*    if (RobotsEEVisible)
-                    OnHideRobotsEE?.Invoke(this, EventArgs.Empty);*/
+                if (RobotsEEVisible)
+                    OnHideRobotsEE?.Invoke(this, EventArgs.Empty);
                 break;
         }
     }
@@ -274,8 +281,8 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     
     private async void OnSceneStarted(SceneStateEventArgs args) {
         SceneStarted = true;
-     //   if (RobotsEEVisible)
-         //   OnShowRobotsEE?.Invoke(this, EventArgs.Empty);
+        if (RobotsEEVisible)
+            OnShowRobotsEE?.Invoke(this, EventArgs.Empty);
         RegisterRobotsForEvent(true, RegisterForRobotEventRequestArgs.WhatEnum.Joints);
         string selectedRobotID = PlayerPrefsHelper.LoadString(SceneMeta.Id + "/selectedRobotId", null);
         SelectedArmId = PlayerPrefsHelper.LoadString(SceneMeta.Id + "/selectedRobotArmId", null);
@@ -362,19 +369,14 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         Debug.Assert(ActionsManagerH.Instance.ActionsReady);
        
         if (SceneMeta != null){
-             HNotificationManager.Instance.ShowNotification(SceneMeta.ToString());
             return false;
         }
-        else {
-             HNotificationManager.Instance.ShowNotification("SCENE META NULL");
-        }
-           
       //  SelectorMenu.Instance.Clear();
-        SetSceneMeta(DataHelper.SceneToBareScene(scene));            
+      try {
+        SetSceneMeta(DataHelper.SceneToBareScene(scene));   
         this.loadResources = loadResources;
      
         LoadSettings();
-   
         UpdateActionObjects(scene, customCollisionModels);
         if (scene.Modified == System.DateTime.MinValue) { //new scene, never saved
             sceneChanged = true;
@@ -385,6 +387,12 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         }
         Valid = true;
         OnLoadScene?.Invoke(this, EventArgs.Empty);
+      }
+      catch (Exception e){
+        HNotificationManager.Instance.ShowNotification("CreateScene  " +  e.Message);
+
+      }      
+       
         return true;
     }
 
@@ -393,7 +401,7 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// Loads selected setings from player prefs
     /// </summary>
     internal void LoadSettings() {
-        ActionObjectsVisibility = PlayerPrefsHelper.LoadFloat("AOVisibilityVR", 1f /*+ (VRModeManager.Instance.VRModeON ? "VR" : "AR"), (VRModeManager.Instance.VRModeON ? 1f : 0f)*/);
+        ActionObjectsVisibility = PlayerPrefsHelper.LoadFloat("AOVisibilityAR", 0f /*+ (VRModeManager.Instance.VRModeON ? "VR" : "AR"), (VRModeManager.Instance.VRModeON ? 1f : 0f)*/);
         ActionObjectsInteractive = PlayerPrefsHelper.LoadBool("scene/" + SceneMeta.Id + "/AOInteractivity", true);
         RobotsEEVisible = PlayerPrefsHelper.LoadBool("scene/" + SceneMeta.Id + "/RobotsEEVisibility", true);
     }
@@ -422,12 +430,18 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// <param name="customCollisionModels">Allows to override action object collision model</param>
     /// <returns></returns>
     public void UpdateActionObjects(Scene scene, CollisionModels customCollisionModels = null) {
-        List<string> currentAO = new List<string>();
-        foreach (IO.Swagger.Model.SceneObject aoSwagger in scene.Objects) {
-            ActionObjectH actionObject = SpawnActionObject(aoSwagger, customCollisionModels);
-            actionObject.ActionObjectUpdate(aoSwagger);
-            currentAO.Add(aoSwagger.Id);
+        try{
+            List<string> currentAO = new List<string>();
+            foreach (IO.Swagger.Model.SceneObject aoSwagger in scene.Objects) {
+                ActionObjectH actionObject = SpawnActionObject(aoSwagger, customCollisionModels);
+                actionObject.ActionObjectUpdate(aoSwagger);
+                currentAO.Add(aoSwagger.Id);
+            }
         }
+        catch (Exception e) {
+            HNotificationManager.Instance.ShowNotification("UpdateActionObjects  " +  e.Message);
+        }
+       
 
     }
 
@@ -456,7 +470,7 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         RemoveActionObjects();
     //    SelectorMenu.Instance.SelectorItems.Clear();
         SceneMeta = null;
-         HNotificationManager.Instance.ShowNotification("DESTORY");
+         HNotificationManager.Instance.ShowNotification("DESTORY SCENE");
         return true;
     }
 
@@ -505,6 +519,10 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         } else {
             obj = Instantiate(ActionObjectNoPosePrefab, ActionObjectsSpawn.transform);
         }
+        if( obj == null){
+            HNotificationManager.Instance.ShowNotification( "OBJECT ---- NULLL" );
+        }
+       
         ActionObjectH actionObject = obj.GetComponent<ActionObjectH>();
         actionObject.InitActionObject(sceneObject, obj.transform.localPosition, obj.transform.localRotation, aom, customCollisionModels);
         // Add the Action Object into scene reference
@@ -512,6 +530,43 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         actionObject.SetVisibility(ActionObjectsVisibility);
         actionObject.ActionObjectUpdate(sceneObject);
         return actionObject;
+    }
+
+    /// <summary>
+    /// Enables all action objects
+    /// </summary>
+    public void EnableAllActionObjects(bool enable, bool includingRobots=true) {
+        foreach (ActionObjectH ao in ActionObjects.Values) {
+            if (!includingRobots && ao.IsRobot())
+                continue;
+            ao.Enable(enable);
+        }
+    }
+
+    public void EnableAllRobots(bool enable) {
+        foreach (ActionObjectH ao in ActionObjects.Values) {
+            if (ao.IsRobot())
+                ao.Enable(enable);
+        }
+    }
+
+    public List<ActionObjectH> GetAllActionObjectsWithoutPose() {
+        List<ActionObjectH> objects = new List<ActionObjectH>();
+        foreach (ActionObjectH actionObject in ActionObjects.Values) {
+            if (!actionObject.ActionObjectMetadata.HasPose && actionObject.gameObject.activeSelf) {
+                objects.Add(actionObject);
+            }
+        }
+        return objects;
+    }
+
+    public async Task<List<HRobotEE>> GetAllRobotsEEs() {
+        List<HRobotEE> eeList = new List<HRobotEE>();
+        foreach (ActionObjectH ao in ActionObjects.Values) {
+            if (ao.IsRobot())
+                eeList.AddRange(await ((HIRobot) ao).GetAllEE());
+        }
+        return eeList;
     }
 
     public List<ActionObjectH> GetAllObjectsOfType(string type) {
@@ -524,21 +579,26 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// <param name="sceneObject">Description of action object</param>
     /// <returns></returns>
     public void SceneObjectAdded(SceneObject sceneObject) {
-     /*   ActionObjectH actionObject = SpawnActionObject(sceneObject);
-        if (!string.IsNullOrEmpty(SelectCreatedActionObject) && sceneObject.Name.Contains(SelectCreatedActionObject)) {
+        ActionObjectH actionObject = SpawnActionObject(sceneObject);
+        HActionObjectPickerMenu.Instance.collisonObjects.SetActive(false);
+        HActionObjectPickerMenu.Instance.models.SetActive(false);
+
+     /*   if (!string.IsNullOrEmpty(SelectCreatedActionObject) && sceneObject.Name.Contains(SelectCreatedActionObject)) {
             if (ActionObjectPickerMenu.Instance.IsVisible())
                 AREditorResources.Instance.LeftMenuScene.AddButtonClick();
             SelectorMenu.Instance.SetSelectedObject(actionObject.SelectorItem, true);
             if (!actionObject.ActionObjectMetadata.HasPose)
                 SelectorMenu.Instance.BottomButtons.SelectButton(SelectorMenu.Instance.BottomButtons.Buttons[2], true);
-        }
-        if (OpenTransformMenuOnCreatedObject) {
-            AREditorResources.Instance.LeftMenuScene.SetActiveSubmenu(LeftMenuSelection.Utility);
-            AREditorResources.Instance.LeftMenuScene.MoveClick();
-        }
+        }*/
+    /*    if (OpenTransformMenuOnCreatedObject) {
+           HSelectorManager.Instance.OnSelectObject(actionObject);
+           HSelectorManager.Instance.transformClicked();
+
+
+        }*/
         SelectCreatedActionObject = "";
         OpenTransformMenuOnCreatedObject = false;
-        updateScene = true;*/
+        updateScene = true;
     }
 
     /// <summary>
@@ -583,5 +643,134 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         }
         updateScene = true;
     }
+
+
+    /// <summary>
+    /// Transform string to underscore case (e.g. CamelCase to camel_case)
+    /// </summary>
+    /// <param name="str">String to be transformed</param>
+    /// <returns>Underscored string</returns>
+    public static string ToUnderscoreCase(string str) {
+        return string.Concat(str.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+    }
+    
+    public string GetFreeObjectTypeName(string objectTypeName) {
+        int i = 1;
+        bool hasFreeName;
+        string freeName = objectTypeName;
+        do {
+            hasFreeName = true;
+            if (ActionsManagerH.Instance.ActionObjectsMetadata.ContainsKey(freeName)) {
+                hasFreeName = false;
+            }
+            if (!hasFreeName)
+                freeName = ToUnderscoreCase(objectTypeName) + "_" + i++.ToString();
+        } while (!hasFreeName);
+
+        return freeName;
+    }
+
+    /// <summary>
+    /// Checks if there is action object of given name
+    /// </summary>
+    /// <param name="name">Human readable name of actio point</param>
+    /// <returns>True if action object with given name exists, false otherwise</returns>
+    public bool ActionObjectsContainName(string name) {
+        foreach (ActionObjectH actionObject in ActionObjects.Values) {
+            if (actionObject.Data.Name == name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /// <summary>
+    /// Finds free action object name, based on action object type (e.g. Box, Box_1, Box_2 etc.)
+    /// </summary>
+    /// <param name="aoType">Type of action object</param>
+    /// <returns></returns>
+    public string GetFreeAOName(string aoType) {
+        int i = 1;
+        bool hasFreeName;
+        string freeName = ToUnderscoreCase(aoType);
+        do {
+            hasFreeName = true;
+            if (ActionObjectsContainName(freeName)) {
+                hasFreeName = false;
+            }
+            if (!hasFreeName)
+                freeName = ToUnderscoreCase(aoType) + "_" + i++.ToString();
+        } while (!hasFreeName);
+
+        return freeName;
+    }
+
+    /// <summary>
+    /// Registers for end effector poses (and if robot has URDF then for joints values as well) and displays EE positions in scene
+    /// </summary>
+    /// <param name="robotId">Id of robot which should be registered. If null, all robots in scene are registered.</param>
+    public bool ShowRobotsEE() {
+        RobotsEEVisible = true;
+        if (SceneStarted) {
+            OnShowRobotsEE?.Invoke(this, EventArgs.Empty);
+        } else {
+          //  Notifications.Instance.ShowToastMessage("End effectors will be shown after going online");
+        }
+
+        PlayerPrefsHelper.SaveBool("scene/" + SceneMeta.Id + "/RobotsEEVisibility", true);
+        return true;
+    }
+
+    /// <summary>
+    /// Hides end effectors and unregister from EE positions and robot joints subscription
+    /// </summary>
+    public void HideRobotsEE() {
+        Debug.LogError("hide");
+        RobotsEEVisible = false;
+        OnHideRobotsEE?.Invoke(this, EventArgs.Empty);
+        PlayerPrefsHelper.SaveBool("scene/" + SceneMeta.Id + "/RobotsEEVisibility", false);
+    }
+
+    /// <summary>
+    /// Updates end effector poses in scene based on recieved poses
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args">Robot ee data</param>
+    private async void RobotEefUpdated(object sender, RobotEefUpdatedEventArgs args) {
+        if (!RobotsEEVisible || !Valid) {
+            return;
+        }
+        foreach (RobotEefDataEefPose eefPose in args.Data.EndEffectors) {
+            try {
+                HIRobot robot = GetRobot(args.Data.RobotId);
+                HRobotEE ee = await robot.GetEE(eefPose.EndEffectorId, eefPose.ArmId);
+                ee.UpdatePosition(TransformConvertor.ROSToUnity(DataHelper.PositionToVector3(eefPose.Pose.Position)),
+                    TransformConvertor.ROSToUnity(DataHelper.OrientationToQuaternion(eefPose.Pose.Orientation)));
+            } catch (ItemNotFoundException) {
+                continue;
+            }
+            
+        }
+    }
+
+    /// <summary>
+    /// Updates robot model based on recieved joints.
+    /// </summary>
+    /// <param name="sender">Who invoked event.</param>
+    /// <param name="args">Robot joints data</param>
+    private async void RobotJointsUpdated(object sender, RobotJointsUpdatedEventArgs args) {
+        // if initializing or deinitializing scene OR scene is not started, dont update robot joints
+        if (!Valid || !SceneStarted)
+            return;
+        try {
+            HIRobot robot = GetRobot(args.Data.RobotId);
+
+            robot.SetJointValue(args.Data.Joints);
+        } catch (ItemNotFoundException) {
+            
+        }
+    }
+
 
 }

@@ -5,6 +5,11 @@ using Hololens;
 using System.Threading.Tasks;
 using System;
 using Base;
+using Microsoft.MixedReality.Toolkit.UI;
+using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
+using Microsoft.MixedReality.Toolkit.UI;
+
+
 
 public abstract class HStartEndAction : HAction
 {
@@ -15,6 +20,8 @@ public abstract class HStartEndAction : HAction
     [SerializeField]
   //  protected OutlineOnClick outlineOnClick;
     public GameObject ModelPrefab;
+    public GameObject interactObject;
+
 
     public override void OnClick() {
        /* if (type == Click.MOUSE_LEFT_BUTTON || type == Click.LONG_TOUCH) {
@@ -25,6 +32,8 @@ public abstract class HStartEndAction : HAction
 
     public virtual void Init(IO.Swagger.Model.Action projectAction, ActionMetadataH metadata, HActionPoint ap, IActionProviderH actionProvider, string actionType) {
         base.Init(projectAction, metadata, ap, actionProvider);
+        interactObject.GetComponentInChildren<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
+
 
         if (!HProjectManager.Instance.ProjectMeta.HasLogic) {
             Destroy(gameObject);
@@ -123,5 +132,31 @@ public abstract class HStartEndAction : HAction
 
     public override void EnableVisual(bool enable) {
         VisualRoot.SetActive(enable);
+        interactObject.SetActive(enable);
+    }
+
+     public void setInterarction(GameObject interactComponents){
+
+        BoxCollider collider = interactComponents.GetComponent<BoxCollider>();
+        collider.size = interactObject.transform.localScale;
+        collider.center = interactObject.transform.localPosition;
+
+        BoundsControl boundsControl = interactComponents.GetComponent<BoundsControl>();
+        ObjectManipulator objectManipulator = interactComponents.GetComponent<ObjectManipulator>();
+        boundsControl.BoundsOverride = collider;
+
+             
+        boundsControl.ScaleLerpTime = 1L;
+        boundsControl.RotateLerpTime = 1L;
+        objectManipulator.ScaleLerpTime = 1L;
+        objectManipulator.RotateLerpTime = 1L;
+
+        boundsControl.ScaleHandlesConfig.ShowScaleHandles = false;
+        boundsControl.RotationHandlesConfig.ShowHandleForX = false;
+        boundsControl.RotationHandlesConfig.ShowHandleForY = false;
+        boundsControl.RotationHandlesConfig.ShowHandleForZ = false;
+
+   
+        boundsControl.UpdateBounds();
     }
 }
