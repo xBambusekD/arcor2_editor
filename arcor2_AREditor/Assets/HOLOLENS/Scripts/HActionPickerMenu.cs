@@ -181,8 +181,6 @@ public class HActionPickerMenu : Singleton<HActionPickerMenu>
 
     foreach (ParameterMetadataH parameterMetadata in   actionMetadata.ParametersMetadata.Values.ToList()) {
         string value = InitActionValue(currentActionPoint, parameterMetadata);
-         Debug.Log("NAME : " + parameterMetadata.Name + "VALUE : " + value + "TYPE : " + parameterMetadata.Type);
-
         IO.Swagger.Model.ActionParameter ap = new IO.Swagger.Model.ActionParameter(name: parameterMetadata.Name, value: value, type: parameterMetadata.Type);
         parameters.Add(ap);
     }

@@ -7,9 +7,10 @@ using Base;
 public class HDeleteActionManager : Singleton<HDeleteActionManager>
 {
 
-   // public Interactable inputButton;
+    public GameObject deleteActionManager;
     public Interactable outputButton;
     public Interactable actionButton;
+    
 
     private HAction action;
     // Start is called before the first frame update
@@ -17,7 +18,7 @@ public class HDeleteActionManager : Singleton<HDeleteActionManager>
     {
         actionButton.OnClick.AddListener(() => HSelectorManager.Instance.deleteObject());
         outputButton.OnClick.AddListener(async () => {await  WebSocketManagerH.Instance.RemoveLogicItem(action.Output.GetLogicItems()[0].Data.Id);
-                                                              HSelectorManager.Instance.deleteActionManager.SetActive(false);  });
+                                                             Hide(); });
 
     }
 
@@ -28,11 +29,21 @@ public class HDeleteActionManager : Singleton<HDeleteActionManager>
     }
 
     public void Show(HAction action){
+        deleteActionManager.SetActive(true);
+        deleteActionManager.transform.parent = action.transform;
+        deleteActionManager.transform.position = action.transform.position;
         this.action = action;
+
         resetButtons();
      
 
     }
+
+    public void Hide() {
+        deleteActionManager.transform.parent = null;
+        deleteActionManager.SetActive(false);
+    }
+
 
     public void resetButtons(){
       //  inputButton.gameObject.SetActive(false);

@@ -25,8 +25,6 @@ public class HTransformMenu : Singleton<HTransformMenu> {
     /// </summary>
     public GameObject GizmoPrefab;
 
-    public Interactable switchButton;
-    public TextMesh switchLabel;
      private HGizmo gizmo;
 
      private bool manipulationStarted = false;
@@ -38,7 +36,6 @@ public class HTransformMenu : Singleton<HTransformMenu> {
         GizmoTransform.gameObject.GetComponent<ObjectManipulator>().OnManipulationEnded.AddListener((s) => updatePosition());
         GizmoTransform.gameObject.GetComponent<BoundsControl>().ScaleStopped.AddListener(() => updateScale());
          GizmoTransform.gameObject.GetComponent<BoundsControl>().RotateStopped.AddListener(() => updatePosition());
-     //   switchButton.OnClick.AddListener( () =>  switchMoveComponent());    
       
 
        
@@ -58,56 +55,6 @@ public class HTransformMenu : Singleton<HTransformMenu> {
     }
 
 
-  /*  private void switchMoveComponent(){
-        if(!axisManipulationActive){
-            switchLabel.text = "On";
-            axisManipulationActive = true;
-            GizmoAxisTransform.transform.position = model.transform.position;
-            GizmoAxisTransform.transform.rotation = model.transform.rotation;
-            gizmo.gameObject.SetActive(true);
-            gizmo.SetXDelta(0);
-            gizmo.SetYDelta(0);
-            gizmo.SetZDelta(0);
-            model.transform.SetParent(GizmoAxisTransform);
-            GizmoTransform.gameObject.SetActive(false);
-           
-
-
-            if(InteractiveObject is RobotActionObjectH robot){
-                UrdfRobot urdfRobot = model.GetComponent<UrdfRobot>();
-                urdfRobot.SetCollidersConvex(false);
-            }
-            else if(InteractiveObject is ActionObject3DH actionObject){
-             BoxCollider collider =  model.GetComponent<BoxCollider>();
-             collider.isTrigger = true;
-            }
-        
-
-        }
-        else{
-            switchLabel.text = "Off";
-            axisManipulationActive = false;
-            gizmo.gameObject.SetActive(false);
-            GizmoTransform.transform.position = model.transform.position;
-            GizmoTransform.transform.rotation = model.transform.rotation;
-            model.transform.SetParent(GizmoTransform);
-            GizmoTransform.gameObject.SetActive(true);
-            
-             if(InteractiveObject is RobotActionObjectH robot){
-                UrdfRobot urdfRobot = model.GetComponent<UrdfRobot>();
-                urdfRobot.SetCollidersConvex(true);
-                robot.setInterarction(GizmoTransform.gameObject);
-             }
-             else if(InteractiveObject is ActionObject3DH actionObject){
-                BoxCollider collider =  model.GetComponent<BoxCollider>();
-                collider.isTrigger = false;
-                actionObject.setInterarction(GizmoTransform.gameObject);
- 
-             }
-        }
-
-    }
-*/
   public async Task updateScale() {
         try {
             IO.Swagger.Model.ObjectModel objectModel = ((ActionObjectH) InteractiveObject).ActionObjectMetadata.ObjectModel;

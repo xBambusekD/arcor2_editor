@@ -96,10 +96,6 @@ namespace Hololens {
             transform.localRotation = GetSceneOrientation();
         }
 
-        public virtual bool SceneInteractable() {
-            return (GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.SceneEditor);
-        }
-
         public bool TryGetParameter(string id, out IO.Swagger.Model.Parameter parameter) {
             foreach (IO.Swagger.Model.Parameter p in Data.Parameters) {
                 if (p.Name == id) {

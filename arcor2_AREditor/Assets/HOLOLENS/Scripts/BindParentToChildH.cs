@@ -26,14 +26,6 @@ public class BindParentToChildH : MonoBehaviour
 
     // Update is called once per frame
     private void Update() {
-        
-            
-        // Update only if scene is in interactable mode
-        if (GameManagerH.Instance.SceneInteractable) {
-            // Update parent transform to match moved child
-            transform.position = ChildToBind.transform.position;
-            transform.rotation = ChildToBind.transform.rotation;
-        }
 
         // Set child transform back to original values
         ChildToBind.transform.localPosition = originalLocalPosition;

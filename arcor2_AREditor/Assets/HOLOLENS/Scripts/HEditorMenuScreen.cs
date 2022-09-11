@@ -74,8 +74,6 @@ public class HEditorMenuScreen : Singleton<HEditorMenuScreen>
              SaveProject();
         }
 
-     
-        //  
 
         if (SceneManagerH.Instance.SceneStarted)
             WebSocketManagerH.Instance.StopScene(false, null);
@@ -92,7 +90,6 @@ public class HEditorMenuScreen : Singleton<HEditorMenuScreen>
     }
 
     private void OnSceneStateEvent(object sender, SceneStateEventArgs args) {
-        Debug.Log("SCE STATE CHANGED");
         if (args.Event.State == IO.Swagger.Model.SceneStateData.StateEnum.Started) {
             switchSceneState.IsToggled = true;
         } 

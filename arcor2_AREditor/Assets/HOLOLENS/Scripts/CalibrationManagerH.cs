@@ -12,7 +12,7 @@ using QRTracking;
     {
     //public GameObject qrCodePrefab;
      public GameObject qrCodePrefab;
-     public GameObject helpPr;
+     public GameObject EditorScenePrefab;
 
         private System.Collections.Generic.SortedDictionary<System.Guid, GameObject> qrCodesObjectsList;
         private bool clearExisting = false;
@@ -83,7 +83,7 @@ using QRTracking;
                 QRCodesManager.Instance.StartQRTracking();
             #else
            //  GameManagerH.Instance.SceneSetParent( helpPr.transform);
-               GameManagerH.Instance.Scene.transform.parent = helpPr.transform;
+               GameManagerH.Instance.Scene.transform.parent = EditorScenePrefab.transform;
                  GameManagerH.Instance.Scene.transform.localPosition = new Vector3(0f, 0f, 0f);
             #endif
 

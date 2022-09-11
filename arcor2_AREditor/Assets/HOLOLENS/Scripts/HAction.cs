@@ -216,9 +216,7 @@ public abstract class HAction : HInteractiveObject
 
         private async Task CreateNewConnection() {
             HConnectionManagerArcoro.Instance.CreateConnectionToPointer(Output.gameObject);
-            
-           // await GameManagerH.Instance.RequestObject(GameManagerH.EditorStateEnum.SelectingAction, GetOtherAction,
-         //       "Select input of other action", ValidateInput, async () => await WriteUnlock());
+    
         }
 
        public async virtual void GetOtherAction(HAction input) {

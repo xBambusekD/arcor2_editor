@@ -23,12 +23,13 @@ public class ActionsManagerH :  Singleton<ActionsManagerH>
 
     public event EventHandler OnServiceMetadataUpdated, OnActionsLoaded;
 
-    public GameObject LinkableParameterInputPrefab, LinkableParameterDropdownPrefab, LinkableParameterDropdownPosesPrefab,
+ /*   public GameObject LinkableParameterInputPrefab, LinkableParameterDropdownPrefab, LinkableParameterDropdownPosesPrefab,
         ParameterDropdownJointsPrefab, ActionPointOrientationPrefab, ParameterRelPosePrefab,
-        LinkableParameterBooleanPrefab, ParameterDropdownPrefab;
+        LinkableParameterBooleanPrefab, ParameterDropdownPrefab;*/
 
     public GameObject InteractiveObjects;
 
+    [HideInInspector]
     public bool ActionsReady, ActionObjectsLoaded, AbstractOnlyObjects;
 
     public event AREditorEventArgs.StringListEventHandler OnObjectTypesAdded, OnObjectTypesRemoved, OnObjectTypesUpdated;
@@ -41,11 +42,11 @@ public class ActionsManagerH :  Singleton<ActionsManagerH>
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Assert(LinkableParameterInputPrefab != null);
+      /*  Debug.Assert(LinkableParameterInputPrefab != null);
         Debug.Assert(LinkableParameterDropdownPrefab != null);
         Debug.Assert(LinkableParameterDropdownPosesPrefab != null);
         Debug.Assert(ParameterDropdownJointsPrefab != null);
-        Debug.Assert(ParameterRelPosePrefab != null);
+        Debug.Assert(ParameterRelPosePrefab != null);*/
         Debug.Assert(InteractiveObjects != null);
         Init();
         WebSocketManagerH.Instance.OnDisconnectEvent += OnDisconnected;

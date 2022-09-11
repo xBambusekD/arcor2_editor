@@ -24,14 +24,9 @@ public class HAction3D : HAction
     private Color32 colorDefault = new Color32(229, 215, 68, 255);
     private Color32 colorRunnning = new Color32(255, 0, 255, 255);
 
-    private bool selected = false;
-    /*[SerializeField]
-    protected OutlineOnClick outlineOnClick;*/
 
     public override void Init(IO.Swagger.Model.Action projectAction, ActionMetadataH metadata,HActionPoint ap, IActionProviderH actionProvider) {
         base.Init(projectAction, metadata, ap, actionProvider);
-       // Input.SelectorItem = SelectorMenu.Instance.CreateSelectorItem(Input);
-        //Output.SelectorItem = SelectorMenu.Instance.CreateSelectorItem(Output);
     }
 
     protected override void Start() {
@@ -46,13 +41,10 @@ public class HAction3D : HAction
     }
 
     private void OnEnable() {
-        GameManagerH.Instance.OnSceneInteractable += OnDeselect;
     }
 
     private void OnDisable() {
-        if (GameManagerH.Instance != null) {
-            GameManagerH.Instance.OnSceneInteractable -= OnDeselect;
-        }
+        
     }
 
     private void OnProjectStop(object sender, System.EventArgs e) {
@@ -64,7 +56,6 @@ public class HAction3D : HAction
         foreach (IO.Swagger.Model.ActionParameter p in Data.Parameters) {
             if (p.Type == "pose") {
                 string orientationId = JsonConvert.DeserializeObject<string>(p.Value);
-             //   HProjectManager.Instance.HighlightOrientation(orientationId, true);
             }
         }
     }
@@ -76,7 +67,6 @@ public class HAction3D : HAction
         foreach (IO.Swagger.Model.ActionParameter p in Data.Parameters) {
             if (p.Type == "pose") {
                 string orientationId = JsonConvert.DeserializeObject<string>(p.Value);
-               // HProjectManager.Instance.HighlightOrientation(orientationId, false);
             }
         }
     }
@@ -92,61 +82,10 @@ public class HAction3D : HAction
     }
 
     public bool CheckClick() {
-        if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.SelectingAction) {
-            GameManagerH.Instance.ObjectSelected(this);
-            return false;
-        }
-        if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal) {
-            return false;
-        }
-        if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor) {
-          //  Notifications.Instance.ShowNotification("Not allowed", "Editation of action only allowed in project editor");
-            return false;
-        }
+
         return true;
+      
 
-    }
-
-    public override void OnClick() {
-  /*      if (!CheckClick())
-            return;
-        if (type == Click.MOUSE_RIGHT_BUTTON || type == Click.TOUCH) {
-            OpenMenu();
-        }*/
-    }
-
-    private void OnDeselect(object sender, EventArgs e) {
-        if (selected) {
-            ActionPoint.HighlightAP(false);
-            selected = false;
-        }
-    }
-
-    public override void OnHoverStart() {
-        if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal &&
-            GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingAction) {
-            if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.InteractionDisabled) {
-                if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning)
-                    return;
-            } else {
-                return;
-            }
-        }
-        if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor &&
-            GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning) {
-            return;
-        }
-     //   outlineOnClick.Highlight();
-        NameText.gameObject.SetActive(true);
-     /*   if (SelectorMenu.Instance.ManuallySelected) {
-            DisplayOffscreenIndicator(true);
-        }*/
-    }
-
-    public override void OnHoverEnd() {
-      //  outlineOnClick.UnHighlight();
-        NameText.gameObject.SetActive(false);
-        DisplayOffscreenIndicator(false);
     }
 
     public override void UpdateColor() {
@@ -163,19 +102,6 @@ public class HAction3D : HAction
         return Data.Name;
     }
 
-    public override void OpenMenu() {
-     //   _ = ActionParametersMenu.Instance.Show(this, false);        
-    }
-
-    public override void CloseMenu() {
-        selected = false;
-        ActionPoint.HighlightAP(false);
-    //    ActionParametersMenu.Instance.Hide();
-    }
-
-    public override bool HasMenu() {
-        return true;
-    }
 
     public override void StartManipulation() {
         throw new NotImplementedException();

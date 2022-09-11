@@ -46,33 +46,9 @@ public class HRobotEE : HInteractiveObject, HISubItem
             eeName.text = $"{Robot.GetName()}/{EEId}";
     }
 
-    public override void OnClick() {
-        if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal) {
-            return;
-        }
-    }
-
     public bool IsSelected => SceneManagerH.Instance.SelectedEndEffector == this;
 
-    public override void OnHoverStart() {
-        eeName.gameObject.SetActive(true);
-    /*    if (SelectorMenu.Instance.ManuallySelected) {
-            DisplayOffscreenIndicator(true);
-        }*/
-      /*  if (IsSelected) {
-            OutlineOnClick.Deselect();
-        }
-        OutlineOnClick.Highlight();*/
-    }
 
-    public override void OnHoverEnd() {
-        eeName.gameObject.SetActive(false);
-        DisplayOffscreenIndicator(false);
-      /*  OutlineOnClick.UnHighlight();
-        if (IsSelected) {
-            OutlineOnClick.Select();
-        }*/
-    }
 
     /// <summary>
     /// Takes world space pose of end effector, converts them to SceneOrigin frame and apply to RobotEE
@@ -95,14 +71,6 @@ public class HRobotEE : HInteractiveObject, HISubItem
 
     public override string GetId() {
         return $"{Robot.GetId()}/{ARMId}/{EEId}";
-    }
-
-    public override void OpenMenu() {
-        throw new System.NotImplementedException();
-    }
-
-    public override bool HasMenu() {
-        return false;
     }
 
     public async override Task<RequestResult> Movable() {
@@ -141,9 +109,6 @@ public class HRobotEE : HInteractiveObject, HISubItem
         }
     }
 
-    public override void CloseMenu() {
-        throw new System.NotImplementedException();
-    }
 
     public override void EnableVisual(bool enable) {
         throw new System.NotImplementedException();

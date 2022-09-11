@@ -13,27 +13,12 @@ using UnityEngine.Events;
 public class HSelectorManager : Singleton<HSelectorManager>
 {
 
-
-   // public GameObject ObjectManupulationScreen;
-    public GameObject transfomButton;
-    public GameObject copyObjectButton;
-  //  public GameObject closeMenuButton;
- //   public GameObject closeDetailButton;
-
-    public GameObject deleteButton;
-
-    public GameObject addAPButton;
-    public GameObject addConnectionButton;
-
-
     public HConfirmDialog confirmDialog;
 
     public HRenameDialog renameDialog;
 
 
     private HInteractiveObject selectedObject;
-
-    public GameObject deleteActionManager;
 
     private UnityAction selectedAction;
 
@@ -65,14 +50,7 @@ public class HSelectorManager : Singleton<HSelectorManager>
     void Start()
     {
         setLastClicked(ClickedEnum.None);
-       // GameManagerH.Instance.OnCloseScene += OnClose;
-       // GameManagerH.Instance.OnCloseProject += OnClose;
-    /*    transfomButton.GetComponent<Interactable>().OnClick.AddListener(() => {setSelectedAction(transformClicked);});
-        deleteButton.GetComponent<Interactable>().OnClick.AddListener(() => {setSelectedAction(deleteClicked); });
-        copyObjectButton.GetComponent<Interactable>().OnClick.AddListener(() => {setSelectedAction(copyObjectClicked); });
-        addConnectionButton.GetComponent<Interactable>().OnClick.AddListener(() => {setSelectedAction(addOutputConnctionClicked); });
-        addAPButton.GetComponent<Interactable>().OnClick.AddListener(() => clickedAddAPButton());
-   */ }
+    }
     
      public void setLastClicked(ClickedEnum lastClicked){
         this.lastClicked = lastClicked;
@@ -97,23 +75,9 @@ public class HSelectorManager : Singleton<HSelectorManager>
         return  lastClicked == ClickedEnum.AddAP;
     }
 
-    public void setSelectedAction(UnityAction selectedAction){
-       /* if(clickedAction == ClickedEnum.Transform){
-            unlockObject();
-        }
-        else if(clickedAction == ClickedEnum.AddOutputConnection && lastClicked == ClickedEnum.AddOutputConnection){
-            HConnectionManagerArcoro.Instance.DestroyConnectionToMouse();
-            unlockObject();
-        }
-        else if(clickedAction == ClickedEnum.AddAP && lastClicked == ClickedEnum.AddAP){
-            HActionPickerMenu.Instance.cancelAction();
-             unlockObject();
-        }*/
-   
+    public void setSelectedAction(UnityAction selectedAction) {   
         AddActionPointHandler.Instance.unregisterHandlers();
         this.selectedAction = selectedAction;
-        
-
     }
 
 
@@ -131,11 +95,8 @@ public class HSelectorManager : Singleton<HSelectorManager>
 
     public void deleteClicked(){
 
-
-
-        deleteActionManager.SetActive(false);
+        HDeleteActionManager.Instance.Hide();
         if(!(selectedObject is ActionObjectH actionO) ||  GameManagerH.Instance.GetGameState().Equals(GameManagerH.GameStateEnum.SceneEditor)){
-
 
             if(selectedObject is HAction action){
                 if(!action.Output.AnyConnection()){
@@ -146,20 +107,12 @@ public class HSelectorManager : Singleton<HSelectorManager>
                 }
                 else{
                     HDeleteActionManager.Instance.Show(action);
-                    deleteActionManager.SetActive(true);
-                    deleteActionManager.transform.parent = selectedObject.transform;
-                    deleteActionManager.transform.position = selectedObject.transform.position;
-
-
                     if(action is HStartAction start){
                         HDeleteActionManager.Instance.setActiveActionButton(false);
-                    //  HDeleteActionManager.Instance.setActiveInputButton(false);
-
                     }
                 }
 
-
-            }else {
+            } else {
                 deleteObject();
             }
         }
@@ -187,8 +140,6 @@ public class HSelectorManager : Singleton<HSelectorManager>
                 parameters.Add(DataHelper.ActionParameterToParameter(p));
             }
             string newName = SceneManagerH.Instance.GetFreeAOName(actionObject.GetName());
-            SceneManagerH.Instance.SelectCreatedActionObject = newName;
-            SceneManagerH.Instance.OpenTransformMenuOnCreatedObject = true;
             await WebSocketManagerH.Instance.AddObjectToScene(newName,
                 actionObject.ActionObjectMetadata.Type, new IO.Swagger.Model.Pose(
                     orientation: DataHelper.QuaternionToOrientation(TransformConvertor.UnityToROS(actionObject.transform.localRotation)),
@@ -253,9 +204,6 @@ public class HSelectorManager : Singleton<HSelectorManager>
               transformObject();
             setLastClicked(ClickedEnum.Transform);
         }
-       
-      
-        
     }
 
     public void actionAddClicked(){
@@ -265,12 +213,10 @@ public class HSelectorManager : Singleton<HSelectorManager>
         }
     }
 
-    
-    
+
     private void RemoveObject(HInteractiveObject obj) {
         if(obj is HAction action){
-            deleteActionManager.transform.parent = null;
-            deleteActionManager.SetActive(false);
+          HDeleteActionManager.Instance.Hide();
 
         }
         obj.Remove();
@@ -281,18 +227,18 @@ public class HSelectorManager : Singleton<HSelectorManager>
     public async void transformObject(){
 
         ///wait 
-   if(!(getSelecetedObject() is HStartEndAction e)){
-        if (!await LockObject(getSelecetedObject(), true)) {
-            return;
-        }
-        if (getSelecetedObject() is CollisionObjectH co) {
-            if (!await co.WriteLockObjectType()) {
-               Debug.Log("Failed to lock the object");
-                await UnlockAllObjects();
+        if(!(getSelecetedObject() is HStartEndAction e)){
+            if (!await LockObject(getSelecetedObject(), true)) {
                 return;
             }
-        } 
-    }
+            if (getSelecetedObject() is CollisionObjectH co) {
+                if (!await co.WriteLockObjectType()) {
+                Debug.Log("Failed to lock the object");
+                    await UnlockAllObjects();
+                    return;
+                }
+            } 
+        }
         HTransformMenu.Instance.activeTransform(getSelecetedObject());
     }
 
@@ -311,9 +257,7 @@ public class HSelectorManager : Singleton<HSelectorManager>
     /// <param name="name">Name of the new action point</param>
     /// <param name="parentId">Id of AP parent. Global if null </param>
     private async void CreateActionPoint(string name, IActionPointParentH parentId = null) {
-    /*    Debug.Assert(!string.IsNullOrEmpty(name));
-        Debug.Assert(parentId != null);
-        selectAPNameWhenCreated = name;*/
+
         bool result = await HProjectManager.Instance.AddActionPoint(name, parentId);
         if(result){
            // HActionPickerMenu.Instance.Show(selectedObject);
@@ -337,7 +281,7 @@ public class HSelectorManager : Singleton<HSelectorManager>
         return false;
     }
 
-      public async Task<RequestResult> UnlockAllObjects() {
+    public async Task<RequestResult> UnlockAllObjects() {
 
         if (GameManagerH.Instance.ConnectionStatus == GameManagerH.ConnectionStatusEnum.Disconnected) {
             lockedObjects.Clear();

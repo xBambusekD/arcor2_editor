@@ -8,7 +8,7 @@ using Base;
 public abstract class HInteractiveObject : MonoBehaviour
 {
     // Start is called before the first frame update
- public bool IsLocked { get; protected set; }
+    public bool IsLocked { get; protected set; }
     public string LockOwner { get; protected set; }
 
     protected bool lockedTree = false; //when object is locked, is also locked the whole tree?
@@ -18,10 +18,8 @@ public abstract class HInteractiveObject : MonoBehaviour
 
     public bool Blocklisted => blocklisted;
 
-    public SelectorItem SelectorItem;
     public List<Collider> Colliders = new List<Collider>();
 
-    //protected Target offscreenIndicator;
 
     /// <summary>
     /// Indicates that object is on blacklist and should not be listed in aim menu and object visibility should be 0
@@ -30,28 +28,13 @@ public abstract class HInteractiveObject : MonoBehaviour
 
     public bool Enabled = true;
 
-    // Call using SendMessage("OnClick", Base.Clickable.Click.MOUSE_LEFT_BUTTON) to specify which button caused the click.
-    // Implement by inheriting from Clickable abstract class.
-    public abstract void OnClick();
-
-    public abstract void OnHoverStart();
-
-    public abstract void OnHoverEnd();
-
     protected virtual void Start() {
         HLockingEventCache.Instance.OnObjectLockingEvent += OnObjectLockingEvent;
-       /* if (!offscreenIndicator) {
-            offscreenIndicator = gameObject.GetComponent<Target>();
-            DisplayOffscreenIndicator(false);
-        }*/
+
     }
 
     public virtual void DisplayOffscreenIndicator(bool active) {
-      /*  if (!offscreenIndicator) {
-            offscreenIndicator = gameObject.GetComponent<Target>();
-        }
 
-        offscreenIndicator.enabled = active;*/
     }
 
     // ONDESTROY CANNOT BE USED BECAUSE OF ITS DELAYED CALL - it causes mess when directly creating project from scene
@@ -67,18 +50,13 @@ public abstract class HInteractiveObject : MonoBehaviour
     public abstract string GetId();
 
     public abstract string GetObjectTypeName();
-    public abstract void OpenMenu();
 
-    public abstract void CloseMenu();
-    public abstract bool HasMenu();
     public abstract Task<RequestResult> Movable();
     public abstract void StartManipulation();
 
     public abstract Task<RequestResult> Removable();
-
-
-
     public abstract void Remove();
+
     public virtual float GetDistance(Vector3 origin) {
         float minDist = float.MaxValue;
         foreach (Collider collider in Colliders) {
@@ -106,12 +84,10 @@ public abstract class HInteractiveObject : MonoBehaviour
             return;
         if (putOnBlocklist) {
             blocklisted = true;
-      //      SelectorMenu.Instance.PutOnBlocklist(SelectorItem);
             PlayerPrefsHelper.SaveBool($"ActionObject/{GetId()}/blocklisted", true);
         }
         if (removeFromBlocklist) {
             blocklisted = false;
-     //       SelectorMenu.Instance.RemoveFromBlacklist(SelectorItem);
 
             PlayerPrefsHelper.SaveBool($"ActionObject/{GetId()}/blocklisted", false);
         }
@@ -121,11 +97,7 @@ public abstract class HInteractiveObject : MonoBehaviour
         foreach (Collider collider in Colliders) {
             collider.enabled = enable;
         }
-        if (SelectorItem != null)
-            SelectorItem.gameObject.SetActive(enable || blocklisted);
-  /*      if (!enable && SelectorMenu.Instance.GetSelectedObject() == this) {
-            SelectorMenu.Instance.DeselectObject(true);
-        }*/
+       
     }
 
     public abstract void UpdateColor();
@@ -210,8 +182,7 @@ public abstract class HInteractiveObject : MonoBehaviour
     public virtual void OnObjectLocked(string owner) {
         IsLocked = true;
         LockOwner = owner;
-      //  if(owner != LandingScreen.Instance.GetUsername())
-        //    UpdateColor();
+    
     }
 
     public virtual void EnableOffscreenIndicator(bool enable) {

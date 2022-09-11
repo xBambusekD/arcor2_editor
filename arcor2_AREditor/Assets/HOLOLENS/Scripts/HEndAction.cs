@@ -36,7 +36,4 @@ public class HEndAction : HStartEndAction
         return "End action";
     }
 
-    public override void CloseMenu() {
-        throw new NotImplementedException();
-    }
 }

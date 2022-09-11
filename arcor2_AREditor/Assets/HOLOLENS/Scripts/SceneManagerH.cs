@@ -39,11 +39,15 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// <summary>
     /// Indicates if action objects should be interactable in scene (if they should response to clicks)
     /// </summary>
+    [HideInInspector]
     public bool ActionObjectsInteractive;
+
     /// <summary>
     /// Indicates visibility of action objects in scene
     /// </summary>
+    [HideInInspector]
     public float ActionObjectsVisibility;
+
     /// <summary>
     /// Indicates if robots end effector should be visible
     /// </summary>
@@ -58,15 +62,9 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     public event EventHandler OnRobotSelected;
 
     /// <summary>
-    /// Object which is currently selected in scene
-    /// </summary>
-    public GameObject CurrentlySelectedObject;
-
-    /// <summary>
     /// Prefab of connectino between action point and action object
     /// </summary>
     public GameObject LineConnectionPrefab;
-
 
     /// <summary>
     /// Manager taking care of connections between action points and action objects
@@ -106,6 +104,8 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// Prefab for collision object
     /// </summary>
     public GameObject CollisionObjectPrefab;
+
+    [HideInInspector]
     public bool Valid = false;
     /// <summary>
     /// Indicates whether or not scene was changed since last save
@@ -125,6 +125,7 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// </summary>
     public GameObject RobotEEPrefab;
 
+    [HideInInspector]
     public string SelectedArmId;
 
     private HRobotEE selectedEndEffector;
@@ -140,11 +141,6 @@ public class SceneManagerH :  Singleton<SceneManagerH>
     /// Contains metainfo about scene (id, name, modified etc) without info about objects and services
     /// </summary>
     public Scene SceneMeta = null;
-
-
-    public string SelectCreatedActionObject;
-    public bool OpenTransformMenuOnCreatedObject;
-
 
     /// <summary>
     /// Public setter for sceneChanged property. Invokes OnSceneChanged event with each change and
@@ -445,21 +441,6 @@ public class SceneManagerH :  Singleton<SceneManagerH>
 
     }
 
-
-    /// <summary>
-    /// Sets selected object
-    /// </summary>
-    /// <param name="obj">Object which is currently selected</param>
-    public void SetSelectedObject(GameObject obj) {
-        if (CurrentlySelectedObject != null) {
-            CurrentlySelectedObject.SendMessage("Deselect");
-        }
-        if (obj != null) {
-            obj.SendMessage("OnSelected", SendMessageOptions.DontRequireReceiver);
-        }
-        CurrentlySelectedObject = obj;
-    }
-
     /// <summary>
     /// Destroys scene and all objects
     /// </summary>
@@ -582,22 +563,6 @@ public class SceneManagerH :  Singleton<SceneManagerH>
         ActionObjectH actionObject = SpawnActionObject(sceneObject);
         HActionObjectPickerMenu.Instance.collisonObjects.SetActive(false);
         HActionObjectPickerMenu.Instance.models.SetActive(false);
-
-     /*   if (!string.IsNullOrEmpty(SelectCreatedActionObject) && sceneObject.Name.Contains(SelectCreatedActionObject)) {
-            if (ActionObjectPickerMenu.Instance.IsVisible())
-                AREditorResources.Instance.LeftMenuScene.AddButtonClick();
-            SelectorMenu.Instance.SetSelectedObject(actionObject.SelectorItem, true);
-            if (!actionObject.ActionObjectMetadata.HasPose)
-                SelectorMenu.Instance.BottomButtons.SelectButton(SelectorMenu.Instance.BottomButtons.Buttons[2], true);
-        }*/
-    /*    if (OpenTransformMenuOnCreatedObject) {
-           HSelectorManager.Instance.OnSelectObject(actionObject);
-           HSelectorManager.Instance.transformClicked();
-
-
-        }*/
-        SelectCreatedActionObject = "";
-        OpenTransformMenuOnCreatedObject = false;
         updateScene = true;
     }
 

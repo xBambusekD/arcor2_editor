@@ -8,53 +8,14 @@ using UnityEngine;
 using Hololens;
 
 
-//[RequireComponent(typeof(OutlineOnClick))]
-//[RequireComponent(typeof(Target))]
 public class HAPOrientation : HInteractiveObject
 {
      public HActionPoint ActionPoint;
     public string OrientationId;
 
-   /* [SerializeField]
-    private OutlineOnClick outlineOnClick;*/
-
     [SerializeField]
     private MeshRenderer renderer;
 
-
-    public override void OnClick() {
-     /*   if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal) {
-            return;
-        }
-        if (type == Click.MOUSE_RIGHT_BUTTON || (type == Click.TOUCH)) {
-            OpenMenu();
-        }  */     
-        
-    }
-
-    public override void OnHoverStart() {
-        if (!enabled)
-            return;
-        
-
-        HighlightOrientation(true);
-     /*   if (SelectorMenu.Instance.ManuallySelected) {
-            DisplayOffscreenIndicator(true);
-        }*/
-    }
-
-    public override void OnHoverEnd() {
-        HighlightOrientation(false);
-        DisplayOffscreenIndicator(false);
-    }
-
-    public void HighlightOrientation(bool highlight) {
-     /*   if (highlight) {
-            outlineOnClick.Highlight();
-        } else {
-            outlineOnClick.UnHighlight();
-        }*/
-    }
 
     public void SetOrientation(IO.Swagger.Model.Orientation orientation) {
         transform.localRotation = TransformConvertor.ROSToUnity(DataHelper.OrientationToQuaternion(orientation));
@@ -62,24 +23,15 @@ public class HAPOrientation : HInteractiveObject
 
     public override string GetName() {
         return ActionPoint.GetNamedOrientation(OrientationId).Name;
-        //return ProjectManager.Instance.GetNamedOrientation(OrientationId).Name;
     }
 
     public override string GetId() {
         return OrientationId;
     }
 
-    public override async void OpenMenu() {
-        throw new NotImplementedException();
-    }
-
-    public override bool HasMenu() {
-        return false;
-    }
 
     public async Task<bool> OpenDetailMenu() {
         if (await ActionPoint.ShowOrientationDetailMenu(OrientationId)) {
-            HighlightOrientation(true);
             return true;
         }
         return false;
@@ -125,13 +77,7 @@ public class HAPOrientation : HInteractiveObject
     }
 
     public override void UpdateColor() {
-       /* Color c;
-        if (Enabled && !(IsLocked && !IsLockedByMe))
-            c = new Color(0.9921f, 0.721f, 0.074f);
-        else
-            c = Color.gray;
-        foreach (Renderer r in outlineOnClick.Renderers)
-            r.material.color = c;*/
+
             
     }
 
@@ -144,10 +90,6 @@ public class HAPOrientation : HInteractiveObject
         Destroy(gameObject);
     }
 
-    public override void CloseMenu() {
-       // ActionPointAimingMenu.Instance.Hide();
-        HighlightOrientation(false);
-    }
 
     public override void EnableVisual(bool enable) {
         throw new System.NotImplementedException();

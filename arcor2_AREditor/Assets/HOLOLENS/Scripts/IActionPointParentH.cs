@@ -14,8 +14,6 @@ public interface IActionPointParentH
 
     Transform GetTransform();
 
-    void OpenMenu();
-
     GameObject GetGameObject();
 
     Transform GetSpawnPoint();

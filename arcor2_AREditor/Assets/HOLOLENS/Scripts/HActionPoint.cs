@@ -570,7 +570,6 @@ public abstract class HActionPoint : HInteractiveObject, IActionPointParentH
         public void BaseUpdateOrientation(NamedOrientation orientation) {
             NamedOrientation originalOrientation = GetOrientation(orientation.Id);
             BaseUpdateOrientation(originalOrientation, orientation);
-            GetOrientationVisual(orientation.Id).SelectorItem.SetText(orientation.Name);
         }
 
         public void BaseUpdateOrientation(NamedOrientation originalOrientation, NamedOrientation orientation) {
@@ -650,13 +649,7 @@ public abstract class HActionPoint : HInteractiveObject, IActionPointParentH
             }
         }
 
-      /*  private void AddNewOrientationVisual(NamedOrientation orientation) {
-            APOrientation apOrientation = Instantiate(ActionsManager.Instance.ActionPointOrientationPrefab, orientations.transform).GetComponent<APOrientation>();
-            apOrientation.ActionPoint = this;
-            apOrientation.SetOrientation(orientation.Orientation);
-            apOrientation.OrientationId = orientation.Id;
-            apOrientation.SelectorItem = SelectorMenu.Instance.CreateSelectorItem(apOrientation);
-        }*/
+
 
         internal async Task<bool> ShowOrientationDetailMenu(string orientationId) {
           /*  if (await ActionPointAimingMenu.Instance.Show(this, true)) {

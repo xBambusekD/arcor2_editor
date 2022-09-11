@@ -5,14 +5,11 @@ using Base;
 using Hololens;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Utilities;
-
-
-
 using System.Threading.Tasks;
 using System;
-
 using IO.Swagger.Model;
 using System.Linq;
+
 public class HProjectManager : Base.Singleton<HProjectManager>
 {
 
@@ -39,14 +36,16 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         /// <summary>
         /// Prefab for project elements
         /// </summary>
-        public GameObject ConnectionPrefab, ActionPointPrefab, PuckPrefab, StartPrefab, EndPrefab;
+        public GameObject  ActionPointPrefab, PuckPrefab, StartPrefab, EndPrefab;
         /// <summary>
         /// Action representing start of program
         /// </summary>
+        [HideInInspector]
         public HStartAction StartAction;
         /// <summary>
         /// Action representing end of program
         /// </summary>
+        [HideInInspector]
         public HEndAction EndAction;
         /// <summary>
         /// ??? Dan?
@@ -55,6 +54,7 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         /// <summary>
         /// Indicates if action point orientations should be visible for given project
         /// </summary>
+        [HideInInspector]
         public bool APOrientationsVisible;
         /// <summary>
         /// Holds current diameter of action points
@@ -63,10 +63,12 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         /// <summary>
         /// Indicates if project is loaded
         /// </summary>
+        [HideInInspector]
         public bool Valid = false;
         /// <summary>
         /// Indicates if editation of project is allowed.
         /// </summary>
+        [HideInInspector]
         public bool AllowEdit = false;
         /// <summary>
         /// Indicates if project was changed since last save
@@ -120,6 +122,7 @@ public class HProjectManager : Base.Singleton<HProjectManager>
         /// <summary>
         /// Indicates whether there is any object with available action in the scene
         /// </summary>
+        [HideInInspector]
         public bool AnyAvailableAction;
 
         public event AREditorEventArgs.ActionPointEventHandler OnActionPointAddedToScene;

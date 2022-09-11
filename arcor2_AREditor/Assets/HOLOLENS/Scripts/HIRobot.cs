@@ -5,7 +5,7 @@ using UnityEngine;
 
 public interface HIRobot
 {
-      string GetName();
+    string GetName();
 
     string GetId();
 

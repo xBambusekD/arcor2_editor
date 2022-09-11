@@ -18,19 +18,6 @@ public class GameManagerH : Singleton<GameManagerH>
 
     private bool updatingPackageState;
 
-
- /*   /// <summary>
-    /// Loading screen with animation
-    /// </summary>
-    public LoadingScreen LoadingScreen;*/
-
-  /*  /// <summary>
-    /// Canvas for headUp info (notifications, tooltip, loading screen etc.
-    /// </summary>
-    [SerializeField]
-    private Canvas headUpCanvas;*/
-
-
     private Boolean calibrationSet = false; 
 
     /// <summary>
@@ -69,11 +56,6 @@ public class GameManagerH : Singleton<GameManagerH>
     private bool openProject = false;
 
     /// <summary>
-    /// Holds ID of currently executing action. Null if there is no such action
-    /// </summary>
-    public string ExecutingAction = null;
-
-    /// <summary>
     /// Holds info of connection status
     /// </summary>
     private ConnectionStatusEnum connectionStatus;
@@ -89,11 +71,6 @@ public class GameManagerH : Singleton<GameManagerH>
     public event EventHandler OnOpenSceneEditor;
 
     /// <summary>
-    /// Callback to be invoked when requested object is selected and potentionally validated
-    /// </summary>
-    private Action<object> ObjectCallback;
-
-    /// <summary>
     /// Enum specifying connection states
     /// </summary>
     public enum ConnectionStatusEnum {
@@ -106,16 +83,11 @@ public class GameManagerH : Singleton<GameManagerH>
     public event EventHandler OnScenesListChanged;
 
     /// <summary>
-    /// Callback to be invoked when requested object is selected
-    /// </summary>
-    private Func<object, Task<RequestResult>> ObjectValidationCallback;
-
-    /// <summary>
     /// Holds current application state (opened screen)
     /// </summary>
     private GameStateEnum gameState;
 
-    public GameObject loadingScene;
+    public GameObject LoadingScreen;
     /// <summary>
     /// Holds info about server (version, supported RPCs, supported parameters etc.)
     /// </summary>
@@ -137,11 +109,6 @@ public class GameManagerH : Singleton<GameManagerH>
     /// </summary>
     public List<IO.Swagger.Model.ListProjectsResponseData> Projects = new List<IO.Swagger.Model.ListProjectsResponseData>();
 
-
-    /// <summary>
-    /// Invoked when in SceneEditor or ProjectEditor state and no menus are opened
-    /// </summary>
-    public event EventHandler OnSceneInteractable;
 
     /// <summary>
     /// Called when list of projects is changed (new project, removed project, renamed project)
@@ -283,17 +250,6 @@ public class GameManagerH : Singleton<GameManagerH>
         }
     }
 
-    
-    /// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! is this still neccassarry? How to use it when there is no menumanager anymore?
-    /// <summary>
-    /// Checks whether scene is interactable
-    /// </summary>
-    public bool SceneInteractable {
-        get => true;
-    }
-
-
-
     /// <summary>
     /// Binds events and sets initial state of app
     /// </summary>
@@ -308,9 +264,8 @@ public class GameManagerH : Singleton<GameManagerH>
 
         WebSocketManagerH.Instance.OnConnectedEvent += OnConnected;
         WebSocketManagerH.Instance.OnDisconnectEvent += OnDisconnected;
-        ActionsManagerH.Instance.OnActionsLoaded += OnActionsLoaded;
-
         WebSocketManagerH.Instance.OnShowMainScreen += OnShowMainScreen;
+        ActionsManagerH.Instance.OnActionsLoaded += OnActionsLoaded;
      /*   WebsocketManager.Instance.OnProjectRemoved += OnProjectRemoved;
         WebsocketManager.Instance.OnProjectBaseUpdated += OnProjectBaseUpdated;
         WebsocketManager.Instance.OnSceneRemoved += OnSceneRemoved;
@@ -375,26 +330,16 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <param name="e"></param>
     private void OnActionsLoaded(object sender, EventArgs e) {
         Debug.Log("OnActionLoaded");
-        //MainMenu.Instance.gameObject.SetActive(true);
     }
 
 
     /// <summary>
     /// Shows loading screen
     /// </summary>
-    /// <param name="text">Optional text for user</param>
-    /// <param name="forceToHide">Sets if HideLoadingScreen needs to be run with force flag to
-    /// hide loading screen. Used to avoid flickering when several actions with own loading
-    /// screen management are chained.</param>
     public void ShowLoadingScreen() {
 
-        loadingScene.SetActive(true);
-      /*  Debug.Assert(LoadingScreen != null);
-        // HACK to make loading screen in foreground
-        // TODO - find better way
-        headUpCanvas.enabled = false;
-        headUpCanvas.enabled = true;
-        LoadingScreen.Show(text, forceToHide);*/
+        LoadingScreen.SetActive(true);
+
     }
 
     /// <summary>
@@ -428,7 +373,7 @@ public class GameManagerH : Singleton<GameManagerH>
             return;
         } catch (TimeoutException e) {
              HNotificationManager.Instance.ShowNotification("Open scene failed");
-        //    HideLoadingScreen();
+             HideLoadingScreen();
         }
         
     }
@@ -483,33 +428,14 @@ public class GameManagerH : Singleton<GameManagerH>
         return;
     }
 
-  /*  /// <summary>
-        /// Callback called when state of currently executed package change
-        /// </summary>
-        /// <param name="state">New state:
-        /// - running - the package is runnnig
-        /// - paused - the package was paused
-        /// - stopped - the package was stopped</param>
-        public void PackageStateUpdated(IO.Swagger.Model.PackageStateData state) {
-            if (!updatingPackageState) {
-                nextPackageState = null;
-                updatingPackageState = true;
-                UpdatePackageState(state);
-            }
-            else
-                nextPackageState = state;
-        }*/
-
     
     /// <summary>
     /// Hides loading screen
     /// </summary>
-    /// <param name="force">Specify if hiding has to be forced. More details in ShowLoadingScreen</param>
     public void HideLoadingScreen(bool force = false) {
 
-        loadingScene.SetActive(false);
-     /*   Debug.Assert(LoadingScreen != null);
-        LoadingScreen.Hide(force);*/
+        LoadingScreen.SetActive(false);
+   
     }
 
 
@@ -546,7 +472,6 @@ public class GameManagerH : Singleton<GameManagerH>
     /// <param name="args"></param>
     private void OnConnected(object sender, EventArgs args) {
         // initialize when connected to the server
-        ExecutingAction = null;
         ConnectionStatus = ConnectionStatusEnum.Connected;
         HNotificationManager.Instance.ShowNotification("Connected");
         //Debug.LogError("onConnected triggered");
@@ -577,16 +502,8 @@ public class GameManagerH : Singleton<GameManagerH>
 
                 SystemInfo = systemInfo;
                 Debug.Log(systemInfo.ToJson());
-            /*    ServerVersion.text = "Editor version: " + Application.version +
-                    "\nServer version: " + systemInfo.Version;*/
-         //       ConnectionInfo.text = WebSocketManagerH.Instance.APIDomainWS;
-           //     MainMenu.Instance.gameObject.SetActive(false);
-
-
                 OnConnectedToServer?.Invoke(this, new StringEventArgs(WebSocketManagerH.Instance.APIDomainWS));
 
-               
-                // await UpdateServices();
                 await UpdateRobotsMeta();
                 await UpdateActionObjects();
 
@@ -705,19 +622,16 @@ public class GameManagerH : Singleton<GameManagerH>
             Scene.SetActive(true);
         }
 #else
-      /* GameObject qrCodePrefab = GameObject.Find("QRCode");
-        SceneSetParent(qrCodePrefab.transform);*/
-      //               GameManagerH.Instance.SceneSeActive(true);
-      Scene.SetActive(true);
+      
+        Scene.SetActive(true);
         
 #endif
-     //   AREditorResources.Instance.LeftMenuScene.DeactivateAllSubmenus();
-     //   MainMenu.Instance.Close();
-         SetGameState(GameStateEnum.SceneEditor);
+    
+        SetGameState(GameStateEnum.SceneEditor);
         OnOpenSceneEditor?.Invoke(this, EventArgs.Empty);
         SetEditorState(EditorStateEnum.Normal);
 
-       HideLoadingScreen();
+        HideLoadingScreen();
     }
 
     
@@ -726,50 +640,19 @@ public class GameManagerH : Singleton<GameManagerH>
     /// </summary>
     public void OpenProjectEditor() {
 #if !UNITY_EDITOR
-      if (CalibrationManagerH.Instance.Calibrated) {
+        if (CalibrationManagerH.Instance.Calibrated) {
             Scene.SetActive(true);
         }
 #else
         Scene.SetActive(true);
 #endif
-       // AREditorResources.Instance.LeftMenuProject.DeactivateAllSubmenus();
-       // MainMenu.Instance.Close();
+      
         SetGameState(GameStateEnum.ProjectEditor);
         OnOpenProjectEditor?.Invoke(this, EventArgs.Empty);
         SetEditorState(EditorStateEnum.Normal);
         HideLoadingScreen();
     }
 
-    /// <summary>
-    /// The object which was selected calls this method to inform game manager about it.
-    /// Validation and potentionally selection callbacks are called and editor is set to normal state.
-    /// </summary>
-    /// <param name="selectedObject"></param>
-    public async void ObjectSelected(object selectedObject) {
-        // if validation callbeck is specified, check if this object is valid
-        if (ObjectValidationCallback != null) {
-            RequestResult result = await ObjectValidationCallback.Invoke(selectedObject);
-            if (!result.Success) {
-              //  Notifications.Instance.ShowNotification(result.Message, "");
-                return;
-            }
-            
-        }
-    /*    SelectorMenu.Instance.PointsToggle.SetInteractivity(true);
-        SelectorMenu.Instance.ActionsToggle.SetInteractivity(true);
-        SelectorMenu.Instance.IOToggle.SetInteractivity(true);
-        SelectorMenu.Instance.ObjectsToggle.SetInteractivity(true);
-        SelectorMenu.Instance.OthersToggle.SetInteractivity(true);
-        SelectorMenu.Instance.RobotsToggle.SetInteractivity(true);*/
-        SetEditorState(EditorStateEnum.Normal);
-        // hide selection info 
-  //      SelectObjectInfo.gameObject.SetActive(false);
-      //  RestoreFilters();
-        // invoke selection callback
-     /*   if (ObjectCallback != null)
-            ObjectCallback.Invoke(selectedObject);*/
-        ObjectCallback = null;
-    }
 
     /// <summary>
     /// Returns editor state
@@ -778,115 +661,6 @@ public class GameManagerH : Singleton<GameManagerH>
     public EditorStateEnum GetEditorState() {
         return editorState;
     }
-
-  /// <summary>
-        /// Switch editor to one of selecting modes (based on request type) and promts user
-        /// to select object / AP / etc. 
-        /// </summary>
-        /// <param name="requestType">Determines what the user should select</param>
-        /// <param name="callback">Action which is called when object is selected and (optionaly) validated</param>
-        /// <param name="message">Message displayed to the user</param>
-        /// <param name="validationCallback">Action to be called when user selects object. If returns true, callback is called,
-        /// otherwise waits for selection of another object</param>
-        public async Task RequestObject(EditorStateEnum requestType, Action<object> callback, string message, Func<object, Task<RequestResult>> validationCallback = null, UnityAction onCancelCallback = null) {
-            // only for "selection" requests
-            Debug.Assert(requestType != EditorStateEnum.Closed &&
-                requestType != EditorStateEnum.Normal &&
-                requestType != EditorStateEnum.InteractionDisabled);
-            SetEditorState(requestType);
-
-    /*        SelectorMenu.Instance.PointsToggle.SetInteractivity(false);
-            SelectorMenu.Instance.ActionsToggle.SetInteractivity(false);
-            SelectorMenu.Instance.IOToggle.SetInteractivity(false);
-            SelectorMenu.Instance.ObjectsToggle.SetInteractivity(false);
-            SelectorMenu.Instance.OthersToggle.SetInteractivity(false);
-            SelectorMenu.Instance.RobotsToggle.SetInteractivity(false);*/
-
-            // "disable" non-relevant elements to simplify process for the user
-         /*   switch (requestType) {
-                case EditorStateEnum.SelectingActionObject:
-                    SelectorMenu.Instance.RobotsToggle.SetInteractivity(true);
-                    SelectorMenu.Instance.ObjectsToggle.SetInteractivity(true);
-                    SceneManager.Instance.EnableAllActionObjects(true, true);
-                    HProjectManager.Instance.EnableAllActionPoints(false);
-                    ProjectManager.Instance.EnableAllActions(false);
-                    ProjectManager.Instance.EnableAllActionOutputs(false);
-                    ProjectManager.Instance.EnableAllActionInputs(false);
-                    ProjectManager.Instance.EnableAllOrientations(false);
-                    if (SceneManager.Instance.SceneStarted)
-                        await ProjectManager.Instance.EnableAllRobotsEE(false);
-                    break;
-                case EditorStateEnum.SelectingActionOutput:
-                    ProjectManager.Instance.EnableAllActionPoints(true);
-                    ProjectManager.Instance.EnableAllActionInputs(false);
-                    ProjectManager.Instance.EnableAllActions(true);
-                    SceneManager.Instance.EnableAllActionObjects(false);
-                    ProjectManager.Instance.EnableAllOrientations(false);
-                    if (SceneManager.Instance.SceneStarted)
-                        await ProjectManager.Instance.EnableAllRobotsEE(false);
-                    ProjectManager.Instance.EnableAllActionOutputs(true);
-                    break;
-                case EditorStateEnum.SelectingActionInput:
-                    ProjectManager.Instance.EnableAllActionPoints(true);
-                    ProjectManager.Instance.EnableAllActionOutputs(false);
-                    ProjectManager.Instance.EnableAllActions(true);
-                    SceneManager.Instance.EnableAllActionObjects(false);
-                    ProjectManager.Instance.EnableAllOrientations(false);
-                    if (SceneManager.Instance.SceneStarted)
-                        await ProjectManager.Instance.EnableAllRobotsEE(false);
-                    ProjectManager.Instance.EnableAllActionInputs(true);
-                    break;
-                case EditorStateEnum.SelectingActionPointParent:
-                    SelectorMenu.Instance.RobotsToggle.SetInteractivity(true);
-                    SelectorMenu.Instance.ObjectsToggle.SetInteractivity(true);
-                    SelectorMenu.Instance.PointsToggle.SetInteractivity(true);
-                    ProjectManager.Instance.EnableAllActions(false);
-                    ProjectManager.Instance.EnableAllOrientations(false);
-                    if (SceneManager.Instance.SceneStarted)
-                        await ProjectManager.Instance.EnableAllRobotsEE(false);
-                    ProjectManager.Instance.EnableAllActionOutputs(false);
-                    ProjectManager.Instance.EnableAllActionInputs(false);
-                    SceneManager.Instance.EnableAllActionObjects(true, true);
-                    ProjectManager.Instance.EnableAllActionPoints(true);
-                    break;
-                case EditorStateEnum.SelectingAPOrientation:
-                    ProjectManager.Instance.EnableAllActions(false);
-                    if (SceneManager.Instance.SceneStarted)
-                        await ProjectManager.Instance.EnableAllRobotsEE(false);
-                    ProjectManager.Instance.EnableAllActionOutputs(false);
-                    ProjectManager.Instance.EnableAllActionInputs(false);
-                    SceneManager.Instance.EnableAllActionObjects(true, true);
-                    ProjectManager.Instance.EnableAllActionPoints(true);
-                    ProjectManager.Instance.EnableAllOrientations(true);
-                    break;
-                case EditorStateEnum.SelectingEndEffector:
-                    ProjectManager.Instance.EnableAllActions(false);
-                    if (SceneManager.Instance.SceneStarted)
-                        ProjectManager.Instance.EnableAllActionOutputs(false);
-                    ProjectManager.Instance.EnableAllActionInputs(false);
-                    SceneManager.Instance.EnableAllActionObjects(false, false);
-                    SceneManager.Instance.EnableAllRobots(true);
-                    await ProjectManager.Instance.EnableAllRobotsEE(true);
-                    ProjectManager.Instance.EnableAllActionPoints(false);
-                    ProjectManager.Instance.EnableAllOrientations(false);
-                    break;
-            }*/
-            ObjectCallback = callback;
-            ObjectValidationCallback = validationCallback;
-            // display info for user and bind cancel callback,
-
-
-      /*      if (onCancelCallback == null) {
-                SelectObjectInfo.Show(message, () => CancelSelection());
-            } else {
-
-                SelectObjectInfo.Show(message,
-                    () => {
-                        onCancelCallback();
-                        CancelSelection();
-                    });
-            }*/
-        }
 
 
     /// <summary>
@@ -898,14 +672,7 @@ public class GameManagerH : Singleton<GameManagerH>
         editorState = newState;
    //     OnEditorStateChanged?.Invoke(this, new EditorStateEventArgs(newState));
     /*    switch (newState) {
-            // when normal state, enable main menu button and status panel
-            case EditorStateEnum.Normal:
-                EditorHelper.EnableCanvasGroup(MainMenuBtnCG, true);
-                break;
-            // otherwise, disable main menu button and status panel
-            default:
-                EditorHelper.EnableCanvasGroup(MainMenuBtnCG, false);
-                break;
+           
         }*/
     }
 
@@ -920,8 +687,6 @@ public class GameManagerH : Singleton<GameManagerH>
 
         Scene.SetActive(false);
         SetGameState(GameStateEnum.MainScreen);
-  //      HMainMenuManager.Instance.ShowMainMenuScreen();
-      //  OnOpenMainScreen?.Invoke(this, EventArgs.Empty);
         SetEditorState(EditorStateEnum.Closed);
         HideLoadingScreen();
     }
@@ -978,15 +743,6 @@ public class GameManagerH : Singleton<GameManagerH>
              if(collider != null)
                 collider.isTrigger = !isEnable;
         }
-
-        /*   if(InteractiveObject is RobotActionObjectH robot){
-                UrdfRobot urdfRobot = model.GetComponent<UrdfRobot>();
-                urdfRobot.SetCollidersConvex(false);
-            }
-            else if(InteractiveObject is ActionObject3DH actionObject){
-             BoxCollider collider =  model.GetComponent<BoxCollider>();
-             collider.isTrigger = true;
-            }*/
         
     }
 
@@ -1013,7 +769,7 @@ public class GameManagerH : Singleton<GameManagerH>
            // ListScenes.Instance.createMenuScene(scene,project);
             if (!await SceneManagerH.Instance.CreateScene(scene, true)) {
                 HNotificationManager.Instance.ShowNotification("Failed to initialize scene Project CreateScene");
-                Debug.LogError("wft");
+           
              //   HideLoadingScreen();
                 return;
             }
@@ -1153,10 +909,6 @@ public class GameManagerH : Singleton<GameManagerH>
     }
 
     public void SceneSetParent(Transform transform){
-       /* ; //z = -1 offset for QRCube
-         //x=90 for QRCube
-        Scene.transform.localScale = new Vector3(1f, 1f, 1f);
-        Scene.transform.localEulerAngles = Vector3.zero;*/
         Scene.transform.parent = transform;
         Scene.transform.localPosition = new Vector3(0f, 0f, 0f);
         Scene.transform.localEulerAngles =  new Vector3(0f, 90f, 90f);

@@ -6,7 +6,6 @@ using Base;
 using UnityEngine;
 using Microsoft.MixedReality.Toolkit.Utilities;
 using Microsoft.MixedReality.Toolkit.UI;
-using SplineMesh;
 
 
 public class HConnectionManagerArcoro : Base.Singleton<HConnectionManagerArcoro>
@@ -81,7 +80,6 @@ public class HConnectionManagerArcoro : Base.Singleton<HConnectionManagerArcoro>
   //      Outline outline = c.gameObject.GetComponent<Outline>();
     //    manipulator.OnHoverEntered.AddListener((a) => Debug.Log("HOVER STARTED"));
       //  manipulator.OnHoverExited.AddListener((a) => outline.enabled = false);
-     //   Debug.Log("CONNECTION F: " + c.target[0].position);
         Connections.Add(c);    
 
         

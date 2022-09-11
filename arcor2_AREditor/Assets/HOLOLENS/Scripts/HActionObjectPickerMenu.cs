@@ -142,7 +142,6 @@ public class HActionObjectPickerMenu : Singleton<HActionObjectPickerMenu>
                     RobotModelH RobotModel = UrdfManagerH.Instance.GetRobotModelInstance(robotMeta.Type, robotMeta.UrdfPackageFilename);
                     
                         if (RobotModel != null) {
-                            Debug.Log(RobotModel);
                             loadedModels++;
                                 
                             RobotModel.RobotModelGameObject.gameObject.transform.parent = selectCube.transform;
@@ -176,15 +175,6 @@ public class HActionObjectPickerMenu : Singleton<HActionObjectPickerMenu>
                           models.GetComponent<GridObjectCollection>().UpdateCollection();
                           MeshImporterH.Instance.LoadModel(actionObject.ObjectModel.Mesh, actionObject.Type);
                 }
-
-               else {
-                    Debug.Log("NO POSE ");
-                    
-                }
-
-
-           // RobotModelH RobotModel = UrdfManagerH.Instance.GetRobotModelInstance(actionObject.Type, actionObject.UrdfPackageFilename);
-
                 
         }
             //    }
@@ -208,7 +198,6 @@ public class HActionObjectPickerMenu : Singleton<HActionObjectPickerMenu>
         if (ActionsManagerH.Instance.ActionObjectsMetadata.TryGetValue(type, out ActionObjectMetadataH actionObjectMetadata)) {
                List<IO.Swagger.Model.Parameter> parameters = new List<IO.Swagger.Model.Parameter>();
             foreach (IO.Swagger.Model.ParameterMeta meta in actionObjectMetadata.Settings) {
-                Debug.Log(meta);
                 IO.Swagger.Model.ActionParameter ap = new IO.Swagger.Model.ActionParameter(name: meta.Name, value: JsonConvert.SerializeObject(meta.DefaultValue), type: meta.Type);
                 parameters.Add(DataHelper.ActionParameterToParameter(ap));
 
@@ -230,7 +219,6 @@ public class HActionObjectPickerMenu : Singleton<HActionObjectPickerMenu>
                 IO.Swagger.Model.Pose pose = null;
                 if (actionObjectMetadata.HasPose)
                     pose = new IO.Swagger.Model.Pose(position: DataHelper.Vector3ToPosition(point), orientation: DataHelper.QuaternionToOrientation(Quaternion.identity));
-                SceneManagerH.Instance.SelectCreatedActionObject = newActionObjectName;
                 
                 await WebSocketManagerH.Instance.AddObjectToScene(newActionObjectName, type, pose, parameters);
              //   callback?.Invoke();
@@ -251,29 +239,21 @@ public class HActionObjectPickerMenu : Singleton<HActionObjectPickerMenu>
     }
     public async void CreateCube() {
         ObjectTypeMeta newObjectType = CreateObjectTypeMeta(CollisionObjectType.Cube);
-        SceneManagerH.Instance.SelectCreatedActionObject = newObjectType.Type;
-        SceneManagerH.Instance.OpenTransformMenuOnCreatedObject = true;
         await WebSocketManagerH.Instance.AddVirtualCollisionObjectToScene(newObjectType.Type, newObjectType.ObjectModel, HSight.Instance.CreatePoseInTheView(), AddVirtualCollisionObjectResponseCallback);        
     }
 
      public async void CreatePlne() {
         ObjectTypeMeta newObjectType = CreateObjectTypeMeta(CollisionObjectType.Plane);
-        SceneManagerH.Instance.SelectCreatedActionObject = newObjectType.Type;
-        SceneManagerH.Instance.OpenTransformMenuOnCreatedObject = true;
         await WebSocketManagerH.Instance.AddVirtualCollisionObjectToScene(newObjectType.Type, newObjectType.ObjectModel, HSight.Instance.CreatePoseInTheView(), AddVirtualCollisionObjectResponseCallback);        
     }
 
     public async void CreateCylinder() {
         ObjectTypeMeta newObjectType = CreateObjectTypeMeta(CollisionObjectType.Cylinder);
-        SceneManagerH.Instance.SelectCreatedActionObject = newObjectType.Type;
-        SceneManagerH.Instance.OpenTransformMenuOnCreatedObject = true;
         await WebSocketManagerH.Instance.AddVirtualCollisionObjectToScene(newObjectType.Type, newObjectType.ObjectModel, HSight.Instance.CreatePoseInTheView(), AddVirtualCollisionObjectResponseCallback);
     }
 
     public async void CreateSphere() {
         ObjectTypeMeta newObjectType = CreateObjectTypeMeta(CollisionObjectType.Sphere);
-        SceneManagerH.Instance.SelectCreatedActionObject = newObjectType.Type;
-        SceneManagerH.Instance.OpenTransformMenuOnCreatedObject = true;
         await WebSocketManagerH.Instance.AddVirtualCollisionObjectToScene(newObjectType.Type, newObjectType.ObjectModel, HSight.Instance.CreatePoseInTheView(), AddVirtualCollisionObjectResponseCallback);
     }
 

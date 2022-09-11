@@ -373,7 +373,6 @@ public class ListScenes : Singleton<ListScenes>
 
    }
 
- 
     public void waitOpenProject(object sender, EventArgs args){
         if(waitingSceneProject != null){
             GameManagerH.Instance.OpenProject(waitingSceneProject);
@@ -428,37 +427,9 @@ public class ListScenes : Singleton<ListScenes>
                         if(action_project.TryGetValue(items.End, out GameObject end)){
                             GameObject lineG = Instantiate(connectionPrefab,scenes[kvp.Key].transform.GetChild(0) );
                             Connection c = lineG.GetComponent<Connection>();
-                         /*   lineG.transform.parent = scenes[kvp.Key].transform.GetChild(0);
-                            LineRenderer line = lineG.AddComponent<LineRenderer>();
-                            line.material = lineMaterial;
-                            line.startWidth = 0.0005f;
-                            line.endWidth = 0.0005f;
-                            Connection c = lineG.AddComponent<Connection>();*/
-                        //      c.
+      
                             c.target[0] = start.transform.Find("Output").GetComponent<RectTransform>();
                             c.target[1] =  end.transform.Find("Input").GetComponent<RectTransform>();
-
-                        
-                            //  line.positionCount = 20;
-                            /*   RectTransform rec1 = start.transform.Find("Output").GetComponent<RectTransform>();
-                            RectTransform rec2 = end.transform.Find("Input").GetComponent<RectTransform>();
-
-
-                            Vector3	p1 = rec1.TransformPoint(
-                                        0,
-                                        rec1.rect.height/2f,
-                                        0);
-                            Vector3	c1 = p1 + rec1.up * 0.1f;
-
-                            Vector3	p2 = rec2.TransformPoint(
-                                        0,
-                                        rec2.rect.height/2f,
-                                        0);
-                            Vector3	c2 = p2 + rec2.up * 0.1f;
-                            for (int i = 0; i < 20; i++) {
-                                line.SetPosition(i, GetBezierPoint((float)i/(float)(19), p1, p2, c1, c2));
-                            }*/
-                        //      lineG.transform.position = GetBezierPoint(.5f,  p1, p2, c1, c2);
                             
                         }
                     }
@@ -467,24 +438,5 @@ public class ListScenes : Singleton<ListScenes>
             }
         }        
     }
-
-      public Vector3 GetBezierPoint(float t, Vector3 p1, Vector3 p2, Vector3 c1, Vector3 c2 , int derivative = 0) {
-		derivative = Mathf.Clamp(derivative, 0, 2);
-		float u = (1f-t);
-	//	Vector3 p1 = points[0].p, p2 = points[1].p, c1 = points[0].c, c2 = points[1].c;
-
-		if (derivative == 0) {
-			return u*u*u*p1 + 3f*u*u*t*c1 + 3f*u*t*t*c2 + t*t*t*p2;
-
-		} else if (derivative == 1) {
-			return 3f*u*u*(c1-p1) + 6f*u*t*(c2-c1) + 3f*t*t*(p2-c2);
-
-		} else if (derivative == 2) {
-			return 6f*u*(c2-2f*c1+p1) + 6f*t*(p2-2f*c2+c1);
-
-		} else {
-			return Vector3.zero;
-		}
-	}
 
 }

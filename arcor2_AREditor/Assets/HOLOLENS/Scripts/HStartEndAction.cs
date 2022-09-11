@@ -23,13 +23,6 @@ public abstract class HStartEndAction : HAction
     public GameObject interactObject;
 
 
-    public override void OnClick() {
-       /* if (type == Click.MOUSE_LEFT_BUTTON || type == Click.LONG_TOUCH) {
-            // We have clicked with left mouse and started manipulation with object
-            StartManipulation();
-        }*/
-    }
-
     public virtual void Init(IO.Swagger.Model.Action projectAction, ActionMetadataH metadata, HActionPoint ap, IActionProviderH actionProvider, string actionType) {
         base.Init(projectAction, metadata, ap, actionProvider);
         interactObject.GetComponentInChildren<Interactable>().OnClick.AddListener(() => HSelectorManager.Instance.OnSelectObject(this) );
@@ -47,39 +40,8 @@ public abstract class HStartEndAction : HAction
         PlayerPrefsHelper.SaveVector3(playerPrefsKey, transform.localPosition);
     }
 
-    public override void OnHoverStart() {
-        if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal &&
-            GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingAction) {
-            if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.InteractionDisabled) {
-                if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning)
-                    return;
-            } else {
-                return;
-            }
-        }
-        if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor &&
-            GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning) {
-            return;
-        }
-     //   outlineOnClick.Highlight();
-        NameText.gameObject.SetActive(true);
-      /*  if (SelectorMenu.Instance.ManuallySelected) {
-            DisplayOffscreenIndicator(true);
-        }*/
-    }
-
-    public override void OnHoverEnd() {
-     //   outlineOnClick.UnHighlight();
-        NameText.gameObject.SetActive(false);
-        DisplayOffscreenIndicator(false);
-    }
-
     public async override Task<RequestResult> Movable() {
         return new RequestResult(true);
-    }
-
-    public override bool HasMenu() {
-        return false;
     }
 
     public override void StartManipulation() {
@@ -109,10 +71,6 @@ public abstract class HStartEndAction : HAction
     public override string GetName() {
         return Data.Name;
     }    
-
-    public override void OpenMenu() {
-        throw new NotImplementedException();
-    }
 
     public async override Task<RequestResult> Removable() {
         return new RequestResult(false, GetObjectTypeName() + " could not be removed");

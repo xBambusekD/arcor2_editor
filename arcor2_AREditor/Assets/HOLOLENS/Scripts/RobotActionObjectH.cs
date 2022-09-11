@@ -16,8 +16,6 @@ using Microsoft.MixedReality.Toolkit.UI;
 
 namespace Hololens {
 
-   // [RequireComponent(typeof(OutlineOnClick))]
-   // [RequireComponent(typeof(Target))]
     public class RobotActionObjectH : ActionObjectH, HIRobot
     {
 
@@ -26,8 +24,7 @@ namespace Hololens {
         public GameObject LockIcon;
 
         public GameObject interactObject;
-      //  private OutlineOnClick outlineOnClick;
-
+  
         public bool ResourcesLoaded = false;
 
         [SerializeField]
@@ -436,34 +433,7 @@ namespace Hololens {
                 }
             }*/
         }
-
-          public override void OnClick() {
-          /*  if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.SelectingActionObject ||
-             GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.SelectingActionPointParent) {
-                GameManagerH.Instance.ObjectSelected(this);
-                return;
-            }
-            if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal) {
-                return;
-            }
-            if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.SceneEditor &&
-                GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor) {
-           //     Notifications.Instance.ShowNotification("Not allowed", "Editation of action object only allowed in scene or project editor");
-                return;
-            }
-           
-            // HANDLE MOUSE
-            if (type == Click.MOUSE_LEFT_BUTTON || type == Click.LONG_TOUCH) {
-                // We have clicked with left mouse and started manipulation with object
-                if (GameManagerH.Instance.GetGameState() == GameManagerH.GameStateEnum.SceneEditor) {
-                    StartManipulation();
-                }
-            } else if (type == Click.MOUSE_RIGHT_BUTTON || type == Click.TOUCH) {
-             //   OpenMenu();
-            }*/
-        }
-
-
+        
         public async Task<List<string>> GetEndEffectorIds(string arm_id = null) {
             await LoadResources();
             List<string> result = new List<string>();
@@ -597,37 +567,6 @@ namespace Hololens {
                 return !string.IsNullOrEmpty(robotMeta.UrdfPackageFilename);
             }
             return false;
-        }
-
-        public override void OnHoverStart() {
-            if (!enabled)
-                return;
-            if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal &&
-                GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingActionObject &&
-                GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingActionPointParent) {
-                if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.InteractionDisabled) {
-                    if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning)
-                        return;
-                } else {
-                    return;
-                }
-            }
-            if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.SceneEditor &&
-                GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor &&
-                GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning) {
-                return;
-            }
-            ActionObjectName.gameObject.SetActive(true);
-         //   outlineOnClick.Highlight();
-      /*      if (SelectorMenu.Instance.ManuallySelected) {
-                DisplayOffscreenIndicator(true);
-            }*/
-        }
-
-        public override void OnHoverEnd() {
-            ActionObjectName.gameObject.SetActive(false);
-    //        outlineOnClick.UnHighlight();
-            DisplayOffscreenIndicator(false);
         }
 
         public override void UpdateObjectName(string newUserId) {
@@ -791,13 +730,6 @@ namespace Hololens {
             }
         }
 
-        public override void OpenMenu() {
-           // _ = ActionObjectMenu.Instance.Show(this, false);
-        }
-
-        public override bool HasMenu() {
-            return true;
-        }
 
         public override async void StartManipulation() {
             throw new NotImplementedException();
@@ -843,10 +775,6 @@ namespace Hololens {
 
         public bool MultiArm() {
             return RobotMeta.MultiArm;
-        }
-
-        public override void CloseMenu() {
-          //  ActionObjectMenu.Instance.Hide();
         }
 
         public override void EnableVisual(bool enable) {

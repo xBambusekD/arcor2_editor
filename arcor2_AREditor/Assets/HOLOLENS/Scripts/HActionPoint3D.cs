@@ -113,7 +113,7 @@ public class HActionPoint3D : HActionPoint
     }
     
     public override bool ProjectInteractable() {
-        return base.ProjectInteractable() && GameManagerH.Instance.SceneInteractable;
+        return base.ProjectInteractable();
     }
 
     public override void ActivateForGizmo(string layer) {
@@ -151,38 +151,6 @@ public class HActionPoint3D : HActionPoint
         }*/
     }
 
-    public override void OnHoverStart() {
-        if (!enabled)
-            return;
-        if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal &&
-            GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingActionPoint &&
-            GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingActionPointParent) {
-            if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.InteractionDisabled) {
-                if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning)
-                    return;
-            } else {
-                return;
-            }
-        }
-        if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor &&
-            GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning) {
-            return;
-        }
-        
-        HighlightAP(true);
-        ActionPointName.gameObject.SetActive(true);
-   /*     if (SelectorMenu.Instance.ManuallySelected) {
-            DisplayOffscreenIndicator(true);
-        }*/
-    }
-
-    public override void OnHoverEnd() {
-        HighlightAP(false);
-        ActionPointName.gameObject.SetActive(false);
-        Lock.SetActive(false);
-        DisplayOffscreenIndicator(false);
-    }
-
 
     public override void ActionPointBaseUpdate(IO.Swagger.Model.BareActionPoint apData) {
         base.ActionPointBaseUpdate(apData);
@@ -202,14 +170,6 @@ public class HActionPoint3D : HActionPoint
             SphereMaterial.color = Color.gray;
             BreakPointMaterial.color = Color.gray;
         }
-    }
-
-    public override async void OpenMenu() {
-        throw new NotImplementedException();
-    }
-
-    public override bool HasMenu() {
-        return false;
     }
 
     public async override void StartManipulation() {
@@ -268,14 +228,6 @@ public class HActionPoint3D : HActionPoint
     public override void OnObjectUnlocked() {
         base.OnObjectUnlocked();
         ActionPointName.text = GetName();
-    }
-
-    public override void OnClick() {
-        throw new NotImplementedException();
-    }
-
-    public override void CloseMenu() {
-        throw new NotImplementedException();
     }
 
     public override void EnableVisual(bool enable) {

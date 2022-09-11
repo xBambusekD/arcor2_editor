@@ -7,10 +7,7 @@ using UnityEngine;
 
 public class ActionObjectNoPoseH : ActionObjectH
 {
-public override void CloseMenu() {
 
-       // ActionObjectMenu.Instance.Hide();
-    }
 
     public override void CreateModel(CollisionModels customCollisionModels = null) {
         // no pose object has no model
@@ -36,29 +33,10 @@ public override void CloseMenu() {
         throw new RequestFailedException("This object has no pose");
     }
 
-    public override bool HasMenu() {
-        return true;
-    }
-
     public override void Hide() {
         throw new NotImplementedException();
     }
 
-    public override void OnClick() {
-        throw new NotImplementedException();
-    }
-
-    public override void OnHoverEnd() {
-        // should not do anything
-    }
-
-    public override void OnHoverStart() {
-        // should not do anything
-    }
-
-    public override async void OpenMenu() {
-       // _ = ActionObjectMenu.Instance.Show(this, false);
-    }
 
     public override void SetInteractivity(bool interactive) {
         

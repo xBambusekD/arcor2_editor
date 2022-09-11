@@ -12,9 +12,6 @@ using System.Threading.Tasks;
 using Microsoft.MixedReality.Toolkit.UI.BoundsControl;
 using Microsoft.MixedReality.Toolkit.UI;
 
-
-//[RequireComponent(typeof(OutlineOnClick))]
-//[RequireComponent(typeof(Target))]
 public class ActionObject3DH : ActionObjectH
 {
     public TextMeshPro ActionObjectName;
@@ -22,8 +19,6 @@ public class ActionObject3DH : ActionObjectH
 
     private bool transparent = false;
     public GameObject interactObject;
-   /* [SerializeField]
-    private OutlineOnClick outlineOnClick;*/
     public GameObject CubePrefab;
     private Shader standardShader;
     private Shader transparentShader;
@@ -57,33 +52,6 @@ public class ActionObject3DH : ActionObjectH
         Data.Pose.Orientation = DataHelper.QuaternionToOrientation(TransformConvertor.UnityToROS(orientation));
     }
 
-    public async override void OnClick() {
-    //    if (GameManager.Instance.GetEditorState() == GameManager.EditorStateEnum.SelectingActionObject ||
-    //        GameManager.Instance.GetEditorState() == GameManager.EditorStateEnum.SelectingActionPointParent) {
-    //        GameManager.Instance.ObjectSelected(this);
-    //        return;
-    //    }
-    //    if (GameManager.Instance.GetEditorState() != GameManager.EditorStateEnum.Normal) {
-    //        return;
-    //    }
-    //    if (GameManager.Instance.GetGameState() != GameManager.GameStateEnum.SceneEditor &&
-    //        GameManager.Instance.GetGameState() != GameManager.GameStateEnum.ProjectEditor) {
-    //        Notifications.Instance.ShowNotification("Not allowed", "Editation of action object only allowed in scene or project editor");
-    //        return;
-    //    }
-
-    //    outlineOnClick.GizmoUnHighlight();
-    //    // HANDLE MOUSE
-    //    if (type == Click.MOUSE_LEFT_BUTTON || type == Click.LONG_TOUCH) {
-    //        // We have clicked with left mouse and started manipulation with object
-    //        if (GameManager.Instance.GetGameState() == GameManager.GameStateEnum.SceneEditor) {
-    //            StartManipulation();
-    //        }
-    //    } else if (type == Click.MOUSE_RIGHT_BUTTON || type == Click.TOUCH) {
-    //        OpenMenu();
-    //    }
-    }
-
     public override void UpdateObjectName(string newUserId) {
         base.UpdateObjectName(newUserId);
         ActionObjectName.text = newUserId;
@@ -94,12 +62,6 @@ public class ActionObject3DH : ActionObjectH
         ActionObjectName.text = actionObjectSwagger.Name;
         ResetPosition();
     }
-
-
-    public override bool SceneInteractable() {
-        return base.SceneInteractable() && GameManager.Instance.SceneInteractable;
-    }
-
 
     public override void SetVisibility(float value, bool forceShaderChange = false) {
         float normalizedValue = value;
@@ -425,41 +387,6 @@ public class ActionObject3DH : ActionObjectH
      //   Notifications.Instance.ShowNotification("Unable to show mesh " + this.GetName(), obj.GetInnerException().Message);
     }
 
-    
-
-
-    public override void OnHoverStart() {
-        if (!enabled)
-            return;
-        if (GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.Normal &&
-            GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingActionObject &&
-            GameManagerH.Instance.GetEditorState() != GameManagerH.EditorStateEnum.SelectingActionPointParent) {
-            if (GameManagerH.Instance.GetEditorState() == GameManagerH.EditorStateEnum.InteractionDisabled) {
-                if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning)
-                    return;
-            } else {
-                return;
-            }
-        }
-        if (GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.SceneEditor &&
-            GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.ProjectEditor &&
-            GameManagerH.Instance.GetGameState() != GameManagerH.GameStateEnum.PackageRunning) {
-            return;
-        }
-        if (ActionObjectMetadata.HasPose) {
-            ActionObjectName.gameObject.SetActive(true);
-        }
-     //   outlineOnClick.Highlight();
-       /* if (SelectorMenu.Instance.ManuallySelected) {
-            DisplayOffscreenIndicator(true);
-        }*/
-    }
-
-    public override void OnHoverEnd() {
-        ActionObjectName.gameObject.SetActive(false);
-      //F  outlineOnClick.UnHighlight();
-      //  DisplayOffscreenIndicator(false);
-    }
 
     public override void UpdateColor() {
         if (Blocklisted)
@@ -509,14 +436,6 @@ public class ActionObject3DH : ActionObjectH
         }
     }
 
-    public override void OpenMenu() {
-       // _ = ActionObjectMenu.Instance.Show(this, false);
-    }
-
-    public override bool HasMenu() {
-        return true;
-    }
-
 
     public override string GetObjectTypeName() {
         return "Action object";
@@ -535,10 +454,6 @@ public class ActionObject3DH : ActionObjectH
 
     public override void StartManipulation() {
         throw new NotImplementedException();
-    }
-
-    public override void CloseMenu() {
-    //    _ = ActionObjectMenu.Instance.Hide();
     }
 
     public override void EnableVisual(bool enable) {

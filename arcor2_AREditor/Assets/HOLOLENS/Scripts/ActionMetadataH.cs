@@ -5,6 +5,7 @@ using UnityEngine;
 using System;
 
 namespace Hololens {
+    
     public class ActionMetadataH : IO.Swagger.Model.ObjectAction
     {
     // Start is called before the first frame update
