@@ -26,6 +26,9 @@
 [submodule "arcor2_AREditor/Submodules/off-screen-indicator"]
 	path = arcor2_AREditor/Submodules/off-screen-indicator
 	url = https://github.com/xBambusekD/off-screen-indicator.git
+[submodule "arcor2_areditor_private"]
+	path = arcor2_AREditor/Submodules/arcor2_areditor_private
+	url = git@github.com:robofit/arcor2_areditor_private.git
 [submodule "arcor2_AREditor/Submodules/QRTracking"]
 	path = arcor2_AREditor/Submodules/QRTracking
 	url = https://github.com/yl-msft/QRTracking.git
