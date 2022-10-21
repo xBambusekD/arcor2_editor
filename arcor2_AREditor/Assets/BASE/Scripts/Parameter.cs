@@ -8,7 +8,6 @@ using UnityEngine.UI;
 using System.Globalization;
 using Michsky.UI.ModernUIPack;
 using UnityEngine.Events;
-using MiniJSON;
 using RosSharp.Urdf;
 
 namespace Base {

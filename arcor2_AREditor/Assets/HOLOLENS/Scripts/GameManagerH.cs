@@ -9,7 +9,6 @@ using UnityEngine.XR.ARFoundation;
 using UnityEngine.Events;
 using System.Collections;
 using Newtonsoft.Json;
-using MiniJSON;
 using Base;
 using RosSharp.Urdf;
 using Hololens;
@@ -257,10 +256,6 @@ public class GameManagerH : Singleton<GameManagerH>
     {
        
         Scene.SetActive(false);
-
-        if (Application.isEditor || Debug.isDebugBuild) {
-            TrilleonAutomation.AutomationMaster.Initialize();
-        }
 
         WebSocketManagerH.Instance.OnConnectedEvent += OnConnected;
         WebSocketManagerH.Instance.OnDisconnectEvent += OnDisconnected;
