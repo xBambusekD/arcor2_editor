@@ -19,6 +19,9 @@ mklink /j ..\arcor2_AREditor\Assets\Submodules\SimpleCollada ..\arcor2_AREditor\
 mklink /j ..\arcor2_AREditor\Assets\Submodules\TriLib ..\arcor2_AREditor\Submodules\arcor2_areditor_private\3rdparty\TriLib
 mklink /j ..\arcor2_AREditor\Assets\Submodules\UIGraph ..\arcor2_AREditor\Submodules\arcor2_areditor_private\3rdparty\UIGraph
 
+mklink /j ..\arcor2_AREditor\Assets\Submodules\MRTK ..\arcor2_AREditor\Submodules\MixedRealityToolkit\Assets\MRTK
+mklink /j ..\arcor2_AREditor\Assets\Submodules\QuickOutline ..\arcor2_AREditor\Submodules\QuickOutline\QuickOutline
+
 del ..\arcor2_AREditor\Submodules\RosSharp\Unity3D\Assets\RosSharp\Plugins\External\Newtonsoft.Json.dll*
 del ..\arcor2_AREditor\Submodules\RosSharp\Unity3D\Assets\RosSharp\Plugins\External\Newtonsoft.Json.xml*
 
