@@ -78,7 +78,7 @@ PlayerSettings:
   androidFullscreenMode: 1
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
-  runInBackground: 1
+  runInBackground: 0
   captureSingleScreen: 0
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
@@ -140,6 +140,10 @@ PlayerSettings:
   preloadedAssets:
   - {fileID: 11400000, guid: 20a9bcdf4f5308b4cbe95702f502a097, type: 2}
   - {fileID: 11400000, guid: 8840d73fe5000973ea1c8daed2dde73f, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -851,14 +855,14 @@ PlayerSettings:
     Windows Store Apps: 6
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Template3D
+  metroPackageName: AREditorPackage
   metroPackageVersion: 1.0.0.0
   metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: VUTFIT
   metroCertificateIssuer: VUTFIT
   metroCertificateNotAfter: 007987d9e221d901
-  metroApplicationDescription: Template_3D
+  metroApplicationDescription: AREditorApp
   wsaImages: {}
   metroTileShortName: AREditor
   metroTileShowName: 0
@@ -875,6 +879,7 @@ PlayerSettings:
   metroSplashScreenUseBackgroundColor: 0
   platformCapabilities:
     WindowsStoreApps:
+      CodeGeneration: False
       OfflineMapsManagement: False
       HumanInterfaceDevice: False
       Location: False
@@ -887,7 +892,6 @@ PlayerSettings:
       InternetClientServer: False
       VideosLibrary: False
       Objects3D: False
-      InternetClient: True
       RemoteSystem: False
       BlockedChatMessages: False
       PhoneCall: False
@@ -909,7 +913,7 @@ PlayerSettings:
       RecordedCallsFolder: False
       Contacts: False
       Proximity: False
-      CodeGeneration: False
+      InternetClient: True
       BackgroundMediaPlayback: False
       EnterpriseAuthentication: False
   metroTargetDeviceFamilies:
