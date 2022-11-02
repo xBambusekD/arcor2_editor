@@ -24,5 +24,8 @@ mklink /j ..\arcor2_AREditor\Assets\Submodules\QuickOutline ..\arcor2_AREditor\S
 
 del ..\arcor2_AREditor\Submodules\RosSharp\Unity3D\Assets\RosSharp\Plugins\External\Newtonsoft.Json.dll*
 del ..\arcor2_AREditor\Submodules\RosSharp\Unity3D\Assets\RosSharp\Plugins\External\Newtonsoft.Json.xml*
+rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\MRTK
+rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\MixedRealityToolkit.Generated
+rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\NuGet
 
 pause
