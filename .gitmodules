@@ -29,9 +29,6 @@
 [submodule "arcor2_AREditor/Submodules/QRTracking"]
 	path = arcor2_AREditor/Submodules/QRTracking
 	url = https://github.com/yl-msft/QRTracking.git
-[submodule "arcor2_AREditor/Submodules/MixedRealityToolkit"]
-	path = arcor2_AREditor/Submodules/MixedRealityToolkit
-	url = https://github.com/microsoft/MixedRealityToolkit-Unity.git
 [submodule "arcor2_AREditor/Submodules/QuickOutline"]
 	path = arcor2_AREditor/Submodules/QuickOutline
 	url = https://github.com/chrisnolet/QuickOutline.git

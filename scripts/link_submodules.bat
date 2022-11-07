@@ -8,7 +8,7 @@ mklink /j ..\arcor2_AREditor\Assets\Submodules\NativeWebSocket ..\arcor2_AREdito
 mklink /j ..\arcor2_AREditor\Assets\Submodules\Automation ..\arcor2_AREditor\Submodules\trilleon\client\Assets\Automation
 mklink /j ..\arcor2_AREditor\Assets\Submodules\OffScreenIndicator "..\arcor2_AREditor\Submodules\off-screen-indicator\Off Screen Indicator\Assets"
 
-mklink /j ..\arcor2_AREditor\Assets\Submodules\QRTacking ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets
+mklink /j ..\arcor2_AREditor\Assets\Submodules\QRTracking ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets
 
 mklink /j "..\arcor2_AREditor\Assets\Submodules\Joystick Pack" "..\arcor2_AREditor\Submodules\arcor2_areditor_private\3rdparty\Joystick Pack"
 mklink /j ..\arcor2_AREditor\Assets\Submodules\loadingBar ..\arcor2_AREditor\Submodules\arcor2_areditor_private\3rdparty\loadingBar
@@ -19,13 +19,11 @@ mklink /j ..\arcor2_AREditor\Assets\Submodules\SimpleCollada ..\arcor2_AREditor\
 mklink /j ..\arcor2_AREditor\Assets\Submodules\TriLib ..\arcor2_AREditor\Submodules\arcor2_areditor_private\3rdparty\TriLib
 mklink /j ..\arcor2_AREditor\Assets\Submodules\UIGraph ..\arcor2_AREditor\Submodules\arcor2_areditor_private\3rdparty\UIGraph
 
-mklink /j ..\arcor2_AREditor\Assets\Submodules\MRTK ..\arcor2_AREditor\Submodules\MixedRealityToolkit\Assets\MRTK
 mklink /j ..\arcor2_AREditor\Assets\Submodules\QuickOutline ..\arcor2_AREditor\Submodules\QuickOutline\QuickOutline
 
 del ..\arcor2_AREditor\Submodules\RosSharp\Unity3D\Assets\RosSharp\Plugins\External\Newtonsoft.Json.dll*
 del ..\arcor2_AREditor\Submodules\RosSharp\Unity3D\Assets\RosSharp\Plugins\External\Newtonsoft.Json.xml*
 rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\MRTK
 rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\MixedRealityToolkit.Generated
-rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\NuGet
 
 pause
