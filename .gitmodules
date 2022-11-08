@@ -29,6 +29,7 @@
 [submodule "arcor2_AREditor/Submodules/QRTracking"]
 	path = arcor2_AREditor/Submodules/QRTracking
 	url = https://github.com/yl-msft/QRTracking.git
+	branch = yl/openxr
 [submodule "arcor2_AREditor/Submodules/QuickOutline"]
 	path = arcor2_AREditor/Submodules/QuickOutline
 	url = https://github.com/chrisnolet/QuickOutline.git
