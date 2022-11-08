@@ -31,4 +31,7 @@ del ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\MixedRealityTo
 rd /s /q ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\XR
 del ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\XR.meta
 
+ren ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\NuGet\Editor\Nuget\NugetForUnity.dll NuGetForUnity.dll
+ren ..\arcor2_AREditor\Submodules\QRTracking\SampleQRCodes\Assets\NuGet\Editor\Nuget\NugetForUnity.dll.meta NuGetForUnity.dll.meta
+
 pause
